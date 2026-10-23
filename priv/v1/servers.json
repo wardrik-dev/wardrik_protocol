@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:servers",
+  "title": "MCP servers",
+  "description": "What servers.list answers: the MCP servers an owner added for their agents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "servers"
+  ],
+  "properties": {
+    "servers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:wardrik:schema:v1:server"
+      }
+    }
+  },
+  "examples": [
+    {
+      "servers": [
+        {
+          "name": "crm",
+          "url": "https://mcp.crm.example/mcp",
+          "auth": "secret"
+        }
+      ]
+    }
+  ]
+}

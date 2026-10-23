@@ -234,6 +234,42 @@
             "type": "integer",
             "minimum": 0,
             "description": "Up to this many seconds of delay, chosen at random each time."
+          },
+          "feed": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "An RSS or Atom feed's URL, or a list of them: the agent is asked only when one has new entries, with them under the prompt. The first run only notes what a feed holds."
+          },
+          "webhook": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "secret"
+            ],
+            "properties": {
+              "secret": {
+                "type": "string",
+                "description": "The secret the service holds, as ${NAME}."
+              },
+              "verify": {
+                "type": "string",
+                "enum": [
+                  "shared",
+                  "standard"
+                ],
+                "description": "shared, where a request presents the secret as a bearer token or at the end of its path, or standard, where it is signed as Standard Webhooks says; shared unless set."
+              }
+            },
+            "description": "In place of every: a service sends the trigger requests, each asked about once."
           }
         }
       },

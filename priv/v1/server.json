@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:server",
+  "title": "An MCP server",
+  "description": "An MCP server an owner added for their agents: its name, its URL, and how its agents sign in to it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "url",
+    "auth"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "What the owner's agents call it."
+    },
+    "url": {
+      "type": "string",
+      "description": "The server's URL."
+    },
+    "auth": {
+      "enum": [
+        "oauth",
+        "secret",
+        "none"
+      ],
+      "description": "How its agents sign in to it."
+    }
+  },
+  "examples": [
+    {
+      "name": "crm",
+      "url": "https://mcp.crm.example/mcp",
+      "auth": "secret"
+    }
+  ]
+}

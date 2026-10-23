@@ -438,6 +438,11 @@
             "call"
           ]
         },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the tool call began."
+        },
         "interrupts": {
           "type": "array",
           "items": {

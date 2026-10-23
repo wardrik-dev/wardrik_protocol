@@ -95,8 +95,10 @@ defmodule WardrikProtocolTest do
                agent.approve agent.ask agent.authorization agent.calls agent.cancel agent.clear
                agent.decide agent.define agent.definition agent.deny agent.events agent.forget
                agent.kill agent.read agent.runs agent.spawn agent.stop agent.timeline
-               agents.cancel agents.forget agents.list audit.list events.head events.list
-               interrupts.list
+               agent.trigger_remove agent.trigger_set agents.cancel agents.forget agents.list
+               audit.list connections.connect connections.disconnect connections.list
+               events.head events.list hook.deliver hook.deliver_with_secret interrupts.list
+               servers.add servers.list servers.remove
              )
 
       assert WardrikProtocol.operation("agent.unknown") == nil
@@ -121,7 +123,7 @@ defmodule WardrikProtocolTest do
 
       for operation <- WardrikProtocol.operations() do
         assert operation.effect in ~w(read change destructive)
-        assert operation.subject in ~w(agent agents deployment)
+        assert operation.subject in ~w(agent agents deployment hook owner)
         assert is_binary(operation.action)
 
         for %{name: name, in: "path"} <- operation.parameters,

@@ -1106,6 +1106,467 @@
           }
         }
       }
+    },
+    "/v1/agents/{agent}/triggers/{trigger}": {
+      "put": {
+        "operationId": "agent.trigger_set",
+        "summary": "Set one of an agent's triggers",
+        "description": "Sets or changes one trigger of an agent with a definition, which keeps it; not_found where it has none. A trigger whose every and timezone stay keeps its next run.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.define",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/trigger"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:trigger_definition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The trigger, with its name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:trigger_definition"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotSupported"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "agent.trigger_remove",
+        "summary": "Remove one of an agent's triggers",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.define",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/trigger"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The trigger, as it was.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:trigger_definition"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/hooks/{agent}/{trigger}": {
+      "post": {
+        "operationId": "hook.deliver",
+        "summary": "Deliver a webhook request to a trigger",
+        "description": "Asks the agent about a request a service sent its webhook trigger, once the request proves itself with the trigger's secret, and only once. One that doesn't answers not_found, as a trigger there isn't does. unavailable means the agent can't be asked now; the service should send it again later.",
+        "tags": [
+          "Hooks"
+        ],
+        "x-wardrik-action": "hook.deliver",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "hook",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/trigger"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:hook_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Taken: the agent is asked about it, once."
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
+    },
+    "/v1/hooks/{agent}/{trigger}/{secret}": {
+      "post": {
+        "operationId": "hook.deliver_with_secret",
+        "summary": "Deliver a webhook request, with the secret in its path",
+        "description": "As hook.deliver, for a service that only takes a URL: the secret ends the path. Keep that URL as private as a token.",
+        "tags": [
+          "Hooks"
+        ],
+        "x-wardrik-action": "hook.deliver",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "hook",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/trigger"
+          },
+          {
+            "$ref": "#/components/parameters/secret"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:hook_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Taken: the agent is asked about it, once."
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
+    },
+    "/v1/connections": {
+      "get": {
+        "operationId": "connections.list",
+        "summary": "List the accounts an owner is offered",
+        "tags": [
+          "Connections"
+        ],
+        "x-wardrik-action": "connection.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The accounts, and whether the owner holds each.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:connections"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/connections/{provider}": {
+      "post": {
+        "operationId": "connections.connect",
+        "summary": "Connect an account",
+        "description": "Connecting asks nobody to approve; the account is held once the person has authorized.",
+        "tags": [
+          "Connections"
+        ],
+        "x-wardrik-action": "connection.connect",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/provider"
+          },
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "That it's held already, or where to authorize it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:connecting"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "connections.disconnect",
+        "summary": "Forget an account",
+        "description": "The next call that needs it asks again.",
+        "tags": [
+          "Connections"
+        ],
+        "x-wardrik-action": "connection.connect",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/provider"
+          },
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account, as it was held.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:connection"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/servers": {
+      "get": {
+        "operationId": "servers.list",
+        "summary": "List the MCP servers an owner added",
+        "tags": [
+          "Servers"
+        ],
+        "x-wardrik-action": "server.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The servers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:servers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "operationId": "servers.add",
+        "summary": "Add an MCP server for an owner's agents",
+        "description": "An org's server serves its own agents and every agent of its people; a person's serves their agents alone. Its tools reach them from their next turn.",
+        "tags": [
+          "Servers"
+        ],
+        "x-wardrik-action": "server.add",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:server_input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "That its agents can call it now, or where someone signs in to it first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:server_added"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/servers/{server}": {
+      "delete": {
+        "operationId": "servers.remove",
+        "summary": "Remove an MCP server",
+        "description": "Its tools leave its agents from their next turn, and the sign-ins to it are forgotten.",
+        "tags": [
+          "Servers"
+        ],
+        "x-wardrik-action": "server.add",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/server"
+          },
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The server, as it was.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:server"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1196,6 +1657,54 @@
         "schema": {
           "type": "string"
         }
+      },
+      "trigger": {
+        "name": "trigger",
+        "in": "path",
+        "required": true,
+        "description": "The trigger's name.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[^/:\\s]+$"
+        }
+      },
+      "secret": {
+        "name": "secret",
+        "in": "path",
+        "required": true,
+        "description": "The webhook's secret, for a service that only takes a URL.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "owner": {
+        "name": "owner",
+        "in": "query",
+        "required": true,
+        "description": "The owner, as acme for an org or acme/@jon for a person.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?$"
+        }
+      },
+      "provider": {
+        "name": "provider",
+        "in": "path",
+        "required": true,
+        "description": "The account's provider, by name.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "server": {
+        "name": "server",
+        "in": "path",
+        "required": true,
+        "description": "The server's name.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+        }
       }
     },
     "responses": {
@@ -1251,6 +1760,16 @@
       },
       "NotSupported": {
         "description": "What was asked isn't supported here yet.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      },
+      "Unavailable": {
+        "description": "It can't be done now; try again later.",
         "content": {
           "application/json": {
             "schema": {

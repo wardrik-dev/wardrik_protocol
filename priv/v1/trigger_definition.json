@@ -2,10 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:wardrik:schema:v1:trigger_definition",
   "title": "A trigger's definition",
-  "description": "The body of PUT /v1/agents/{key}/triggers/{trigger}, with a prompt or a prompt_file. A trigger on a clock has every, and a cron expression a timezone where it is not UTC; overlap is skip, missed is run_once and jitter is 0 where they are left out, and any other field is the source's that it watches, which one of them names; without one, it asks on every run. A webhook has webhook in place of every, holding its secret, as ${NAME}, and verify, shared or standard; it is sent requests at POST /v1/hooks/{key}/{trigger}, and its overlap is queue where it says none.",
+  "description": "What agent.trigger_set takes, with a prompt or a prompt_file, and what it and agent.trigger_remove answer, with its name. A trigger on a clock has every, and a cron expression a timezone where it is not UTC; overlap is skip, missed is run_once and jitter is 0 where they are left out. feed watches an RSS or Atom feed, or a list of them. A webhook has webhook in place of every, holding its secret, as ${NAME}, and verify, shared or standard; it is sent requests at POST /v1/hooks/{agent}/{trigger}, and its overlap is queue where it says none.",
   "type": "object",
   "additionalProperties": true,
   "properties": {
+    "name": {
+      "type": "string",
+      "description": "The trigger's name, which the path gives."
+    },
     "every": {
       "type": "string",
       "description": "A cron expression, or a duration such as 30m."
@@ -42,6 +46,42 @@
       "type": "integer",
       "minimum": 0,
       "description": "Up to this many seconds of delay, chosen at random each time."
+    },
+    "feed": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "An RSS or Atom feed's URL, or a list of them: the agent is asked only when one has new entries, with them under the prompt. The first run only notes what a feed holds."
+    },
+    "webhook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "secret"
+      ],
+      "properties": {
+        "secret": {
+          "type": "string",
+          "description": "The secret the service holds, as ${NAME}."
+        },
+        "verify": {
+          "type": "string",
+          "enum": [
+            "shared",
+            "standard"
+          ],
+          "description": "shared, where a request presents the secret as a bearer token or at the end of its path, or standard, where it is signed as Standard Webhooks says; shared unless set."
+        }
+      },
+      "description": "In place of every: a service sends the trigger requests, each asked about once."
     }
   },
   "examples": [
