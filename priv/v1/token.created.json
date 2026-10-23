@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:token.created",
+  "title": "wardrik.token.created",
+  "description": "Someone made an API token, which acts for whoever made it.",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "principal": {
+      "$ref": "urn:wardrik:schema:v1:defs#/$defs/principal"
+    },
+    "statements": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:wardrik:schema:v1:defs#/$defs/statement"
+      },
+      "description": "What it allows, on what; anything none states is denied."
+    },
+    "policy": {
+      "type": "string",
+      "description": "The policy every agent it defines runs under, ahead of the agent's own, by its name: what IAM calls a permissions boundary. Absent where it names none."
+    },
+    "expires": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When it stops working."
+    },
+    "actor": {
+      "$ref": "urn:wardrik:schema:v1:defs#/$defs/principal"
+    },
+    "assumed_by": {
+      "$ref": "urn:wardrik:schema:v1:defs#/$defs/assumed_by"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "token",
+    "principal",
+    "statements"
+  ]
+}
