@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:wardrik:schema:v1:server_added",
   "title": "A server added",
-  "description": "What servers.add answers: that the owner's agents can call the server now, or where someone signs in to it first.",
+  "description": "What mcp_servers.add answers: that the owner's agents can call the server now, or where someone signs in to it first.",
   "type": "object",
   "additionalProperties": false,
   "required": [

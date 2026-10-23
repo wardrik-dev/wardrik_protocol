@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:wardrik:schema:v1:servers",
   "title": "MCP servers",
-  "description": "What servers.list answers: the MCP servers an owner added for their agents.",
+  "description": "What mcp_servers.list answers: the MCP servers an owner added for their agents.",
   "type": "object",
   "additionalProperties": false,
   "required": [

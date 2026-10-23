@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:token_input",
+  "title": "A token to make",
+  "description": "What tokens.create takes: its name, the resources it reaches, and the roles it holds there. It acts for whoever makes it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "resources",
+    "roles"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "What it is listed as."
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "What it reaches, each a resource pattern: acme/agent/* for acme's own agents, acme/@jon/* for everything of a user's, acme/* for everything of the org's and its users', acme/agent/triage for one agent, or * for everything."
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "reader",
+          "messenger",
+          "approver",
+          "definer",
+          "owner"
+        ]
+      },
+      "minItems": 1,
+      "description": "What it may do there, each a named set of actions."
+    },
+    "policy": {
+      "type": "string",
+      "description": "The policy every agent it defines runs under, ahead of the agent's own, by the name the server holds it under: what IAM calls a permissions boundary. The token making it names its own where this is left out."
+    },
+    "expires_in": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many seconds it works for; the server's own lifetime for API tokens, 90 days unless set, where left out."
+    }
+  },
+  "examples": [
+    {
+      "name": "ci",
+      "resources": [
+        "acme/agent/*"
+      ],
+      "roles": [
+        "reader",
+        "messenger"
+      ],
+      "expires_in": 2592000
+    }
+  ]
+}

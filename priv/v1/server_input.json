@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:wardrik:schema:v1:server_input",
   "title": "A server to add",
-  "description": "What servers.add takes: the server's name, its URL, how the owner's agents sign in to it, and which of its tools they take.",
+  "description": "What mcp_servers.add takes: the server's name, its URL, how the owner's agents sign in to it, and which of its tools they take.",
   "type": "object",
   "additionalProperties": false,
   "required": [

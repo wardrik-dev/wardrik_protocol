@@ -33,6 +33,13 @@
       "type": "integer",
       "minimum": 0,
       "description": "How many messages wait behind what it's doing."
+    },
+    "node": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The node it runs on, by its name; null while it sleeps."
     }
   },
   "examples": [

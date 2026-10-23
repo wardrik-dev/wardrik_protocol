@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:reloaded",
+  "title": "Reloaded",
+  "description": "What deployment.reload answers: the nodes that read every agent's definition again.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reloaded"
+  ],
+  "properties": {
+    "reloaded": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "examples": [
+    {
+      "reloaded": [
+        "wardrik@box1"
+      ]
+    }
+  ]
+}

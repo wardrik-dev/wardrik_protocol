@@ -1431,12 +1431,12 @@
     },
     "/v1/servers": {
       "get": {
-        "operationId": "servers.list",
+        "operationId": "mcp_servers.list",
         "summary": "List the MCP servers an owner added",
         "tags": [
           "Servers"
         ],
-        "x-wardrik-action": "server.read",
+        "x-wardrik-action": "mcp_server.read",
         "x-wardrik-effect": "read",
         "x-wardrik-subject": "owner",
         "parameters": [
@@ -1470,13 +1470,13 @@
         }
       },
       "post": {
-        "operationId": "servers.add",
+        "operationId": "mcp_servers.add",
         "summary": "Add an MCP server for an owner's agents",
         "description": "An org's server serves its own agents and every agent of its people; a person's serves their agents alone. Its tools reach them from their next turn.",
         "tags": [
           "Servers"
         ],
-        "x-wardrik-action": "server.add",
+        "x-wardrik-action": "mcp_server.add",
         "x-wardrik-effect": "change",
         "x-wardrik-subject": "owner",
         "parameters": [
@@ -1525,13 +1525,13 @@
     },
     "/v1/servers/{server}": {
       "delete": {
-        "operationId": "servers.remove",
+        "operationId": "mcp_servers.remove",
         "summary": "Remove an MCP server",
         "description": "Its tools leave its agents from their next turn, and the sign-ins to it are forgotten.",
         "tags": [
           "Servers"
         ],
-        "x-wardrik-action": "server.add",
+        "x-wardrik-action": "mcp_server.add",
         "x-wardrik-effect": "destructive",
         "x-wardrik-subject": "owner",
         "parameters": [
@@ -1549,6 +1549,258 @@
               "application/json": {
                 "schema": {
                   "$ref": "urn:wardrik:schema:v1:server"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/tokens": {
+      "get": {
+        "operationId": "tokens.list",
+        "summary": "List the API tokens",
+        "tags": [
+          "Tokens"
+        ],
+        "x-wardrik-action": "deployment.tokens",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "deployment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Every token, never a secret.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:tokens"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "operationId": "tokens.create",
+        "summary": "Make an API token",
+        "description": "The token acts for whoever makes it, and is kept as the SHA-256 of its secret. It works for 90 days, or expires_in seconds.",
+        "tags": [
+          "Tokens"
+        ],
+        "x-wardrik-action": "deployment.tokens",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "deployment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:token_input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The token, and its secret, given this once.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:token_issued"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/tokens/{token}": {
+      "delete": {
+        "operationId": "tokens.revoke",
+        "summary": "Revoke an API token",
+        "description": "A revoked token is refused at once. An agent it defined keeps running, under the policy it was defined with.",
+        "tags": [
+          "Tokens"
+        ],
+        "x-wardrik-action": "deployment.tokens",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "deployment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The token, as it was.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:token"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/deployment/reload": {
+      "post": {
+        "operationId": "deployment.reload",
+        "summary": "Read every agent's definition again",
+        "description": "Each awake agent takes its definition as it reads now from its next turn, and each sleeping one as it wakes. The node that answers reads its servers and triggers again too.",
+        "tags": [
+          "Deployment"
+        ],
+        "x-wardrik-action": "deployment.reload",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "deployment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The nodes that read them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:reloaded"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/deployment/nodes": {
+      "get": {
+        "operationId": "deployment.nodes",
+        "summary": "List the deployment's nodes",
+        "tags": [
+          "Deployment"
+        ],
+        "x-wardrik-action": "deployment.nodes",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "deployment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The nodes, with how many agents run on each, and how many sleep.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:nodes"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/move": {
+      "post": {
+        "operationId": "agent.move",
+        "summary": "Move an agent to another node",
+        "description": "Starts the agent again on node, as it was. A turn it's taking ends, and what it waits on is abandoned, so ask it again once it's moved.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "deployment.move",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "deployment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:node"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The agent, on the node it moved to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agent_answer"
                 }
               }
             }
@@ -1704,6 +1956,15 @@
         "schema": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
+        }
+      },
+      "token": {
+        "name": "token",
+        "in": "path",
+        "required": true,
+        "description": "The token's id.",
+        "schema": {
+          "type": "string"
         }
       }
     },
