@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:ask",
+  "title": "A message to ask",
+  "description": "What agent.ask takes: its text as content, or as text parts, under an id of the caller's, or one it's given. A message sent again under the same id is taken once.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "urn:wardrik:schema:v1:defs#/$defs/part"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "content"
+      ]
+    },
+    {
+      "required": [
+        "parts"
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "content": "What's on fire?"
+    },
+    {
+      "id": "msg_01",
+      "parts": [
+        {
+          "type": "text",
+          "content": "What's on fire?"
+        }
+      ]
+    }
+  ]
+}

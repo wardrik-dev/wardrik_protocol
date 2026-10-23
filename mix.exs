@@ -7,7 +7,7 @@ defmodule WardrikProtocol.MixProject do
       version: "0.1.0",
       elixir: "~> 1.20",
       description:
-        "The JSON Schemas of what Wardrik sends and takes: its events, as CloudEvents.",
+        "What Wardrik sends and takes: its events, as CloudEvents, and its operations, as OpenAPI.",
       package: package(),
       docs: [main: "readme", extras: ["README.md"]],
       start_permanent: Mix.env() == :prod,

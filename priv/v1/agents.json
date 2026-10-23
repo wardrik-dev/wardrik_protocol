@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:agents",
+  "title": "Agents",
+  "description": "What agents.list answers: the agents the patterns cover.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agents"
+  ],
+  "properties": {
+    "agents": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:wardrik:schema:v1:agent"
+      }
+    }
+  }
+}

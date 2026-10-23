@@ -4,16 +4,30 @@ defmodule WardrikProtocol.Inline do
   @prefix "urn:wardrik:schema:v1:"
 
   @spec schema(Path.t(), String.t()) :: map()
-  def schema(dir, name), do: dir |> read(name) |> Map.drop(["$schema", "$id"]) |> whole(dir)
+  def schema(dir, name), do: dir |> read(name) |> whole(dir)
 
-  defp read(dir, name), do: dir |> Path.join(name <> ".json") |> File.read!() |> JSON.decode!()
+  @spec read(Path.t(), String.t()) :: map()
+  def read(dir, name) do
+    dir
+    |> Path.join(name <> ".json")
+    |> File.read!()
+    |> JSON.decode!()
+    |> Map.drop(["$schema", "$id"])
+  end
 
-  defp whole(%{"$ref" => @prefix <> "defs#/$defs/" <> type}, dir),
-    do: dir |> read("defs") |> get_in(["$defs", type]) |> whole(dir)
+  @spec whole(term(), Path.t()) :: term()
+  def whole(%{"$ref" => @prefix <> ref}, dir), do: ref |> referenced(dir) |> whole(dir)
 
-  defp whole(%{} = schema, dir),
+  def whole(%{} = schema, dir),
     do: Map.new(schema, fn {key, value} -> {key, whole(value, dir)} end)
 
-  defp whole(list, dir) when is_list(list), do: Enum.map(list, &whole(&1, dir))
-  defp whole(value, _dir), do: value
+  def whole(list, dir) when is_list(list), do: Enum.map(list, &whole(&1, dir))
+  def whole(value, _dir), do: value
+
+  defp referenced(ref, dir) do
+    case String.split(ref, "#/$defs/") do
+      [name, type] -> dir |> read(name) |> get_in(["$defs", type])
+      [name] -> read(dir, name)
+    end
+  end
 end

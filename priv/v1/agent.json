@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:agent",
+  "title": "An agent, listed",
+  "description": "One agent of agents.list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "status",
+    "pending"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The agent's ID: org/name, or org/@user/name for one that works for a user."
+    },
+    "name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "running",
+        "parked",
+        "asleep"
+      ],
+      "description": "Whether it waits for a message, answers one, waits on a person, or sleeps until something asks it."
+    },
+    "pending": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many messages wait behind what it's doing."
+    }
+  },
+  "examples": [
+    {
+      "id": "acme/triage",
+      "name": "triage",
+      "status": "parked",
+      "pending": 0
+    }
+  ]
+}

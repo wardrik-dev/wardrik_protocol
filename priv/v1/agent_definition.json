@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:agent_definition",
+  "title": "An agent's definition",
+  "description": "What agent.define takes, and agent.definition answers: what an agent is, and what it may do. An agent file's frontmatter takes the same keys, with its body as instructions, and name, org and user besides.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "What a person calls the agent; its name unless given."
+    },
+    "description": {
+      "type": "string",
+      "description": "What the agent is for, in words a person reads."
+    },
+    "instructions": {
+      "type": "string",
+      "description": "The system prompt."
+    },
+    "model": {
+      "type": "string",
+      "description": "The model, as provider:model."
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What the agent may call: a tool the server ships, by name; files for the file tools over the agent's own tree and the trees it shares; server/* for every tool of an MCP server; workers/* for every tool the connected tool workers offer it; self/* for its operations on itself; agents/* for its operations on the agents of its org; or * for all of them."
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shared": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "A tree: org, org/name or org/@user/name."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "tree"
+                ],
+                "properties": {
+                  "tree": {
+                    "type": "string"
+                  },
+                  "mode": {
+                    "enum": [
+                      "read",
+                      "write"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "description": "The trees shared with the agent, by the name each is seen under at shared/<name>/: a tree, or a tree and a mode, write unless it says read."
+        }
+      },
+      "description": "The trees the agent shares with other agents. Only trees the token's scope covers, and tools names files to reach them."
+    },
+    "context": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_bytes": {
+              "type": "integer",
+              "minimum": 1024,
+              "maximum": 262144
+            }
+          }
+        }
+      ],
+      "description": "The files read into each turn, at most 20, in the agent's tree or one it shares, up to 16 KB of them unless max_bytes says. tools names files to read them with."
+    },
+    "policy": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "A policy the server holds, by name."
+        },
+        {
+          "type": "object",
+          "description": "Rules, as a policy file writes them."
+        }
+      ]
+    },
+    "timeout": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "How many seconds a turn may take."
+    },
+    "idle_timeout": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "const": "infinity"
+        }
+      ],
+      "description": "How many seconds the agent may have nothing to do before it sleeps, until something asks it. The server's default when absent."
+    },
+    "max_iterations": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "const": "infinity"
+        }
+      ],
+      "description": "How many rounds of tool calls a turn may make."
+    },
+    "retries": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many times a failed model call is tried again: 6 unless set. 0 never tries again."
+        },
+        "max_wait": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The longest wait between tries, in seconds: 60 unless set."
+        },
+        "on_exhausted": {
+          "type": "string",
+          "enum": [
+            "ask",
+            "fail"
+          ],
+          "description": "What happens once the tries are spent: ask a person whether to try again, or fail the turn. ask unless set."
+        }
+      },
+      "description": "How a turn tries a failed model call again, after a random wait of up to a second that doubles each time. A 4xx answer other than 408, 425 and 429 is not tried again. The host's defaults hold where this is absent."
+    },
+    "compaction": {
+      "oneOf": [
+        {
+          "const": false
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "at": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "exclusiveMaximum": 1
+            },
+            "keep": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "exclusiveMaximum": 1
+            },
+            "window": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      ],
+      "description": "When the agent summarises its older history, as shares of the model's window; false never does."
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The trigger's name, trigger-1, trigger-2 and so on by its place in the list where it is left out."
+          },
+          "every": {
+            "type": "string",
+            "description": "A cron expression, or a duration such as 30m."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "The time zone a cron expression in every is read in, by its IANA name, as Europe/Berlin; Etc/UTC where it is left out. A duration counts elapsed time and takes none."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "What the agent is asked each time."
+          },
+          "prompt_file": {
+            "type": "string",
+            "description": "In place of prompt, a file in the agent's tree: each time, the agent is asked to read it and do what it says. tools names files to read it with."
+          },
+          "overlap": {
+            "type": "string",
+            "enum": [
+              "skip",
+              "queue"
+            ],
+            "description": "What a firing does while a run is still going: skip it, or queue its prompt."
+          },
+          "missed": {
+            "type": "string",
+            "enum": [
+              "run_once",
+              "skip"
+            ],
+            "description": "What a trigger does about the firings it missed while down."
+          },
+          "jitter": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Up to this many seconds of delay, chosen at random each time."
+          }
+        }
+      },
+      "description": "The triggers that ask the agent something when they come round, each with a prompt or a prompt_file. A definition put again replaces them all, and PUT and DELETE /v1/agents/{key}/triggers/{trigger} change one. Any other field is the source's that the trigger watches, which one of them names; without one, it asks on every run. A trigger on a clock has every, and a timezone a cron expression is read in; a webhook has webhook in its place, holding its secret and how a request is verified, and is sent requests at POST /v1/hooks/{key}/{trigger}."
+    },
+    "notify": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "to"
+          ],
+          "properties": {
+            "to": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "The targets, as config.yaml's notify names them, and rooms in channels, as slack:#updates."
+            },
+            "on": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "parked",
+                  "failed",
+                  "finished"
+                ]
+              },
+              "description": "What is sent: parked and failed turns unless set, and finished for what a turn answered."
+            }
+          }
+        }
+      ],
+      "description": "Who hears when the agent parks, fails or answers: a target config.yaml's notify names or a room in a channel, as slack:#updates; a list of them; or to and on. A target tells only the agents of the orgs it serves, and a room is posted in a workspace of the agent's own owner."
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The chat channels, as config.yaml names them, it may be chosen to answer in."
+    }
+  },
+  "examples": [
+    {
+      "display_name": "Triage",
+      "description": "Watches the incident queue.",
+      "instructions": "You watch the incident queue.",
+      "model": "anthropic:claude-sonnet-5",
+      "tools": [
+        "web_search",
+        "linear/*",
+        "files"
+      ],
+      "workspace": {
+        "shared": {
+          "team": "acme"
+        }
+      },
+      "context": [
+        "MEMORY.md",
+        "shared/team/CONVENTIONS.md"
+      ],
+      "policy": {
+        "ask": [
+          "linear/*"
+        ]
+      },
+      "timeout": 600,
+      "idle_timeout": 900,
+      "max_iterations": 12,
+      "retries": {
+        "attempts": 4,
+        "max_wait": 30,
+        "on_exhausted": "fail"
+      },
+      "compaction": {
+        "at": 0.6,
+        "keep": 0.25
+      },
+      "triggers": [
+        {
+          "name": "sweep",
+          "every": "*/30 * * * *",
+          "prompt": "Check the incident queue."
+        }
+      ],
+      "notify": {
+        "to": [
+          "ops"
+        ],
+        "on": [
+          "parked",
+          "failed",
+          "finished"
+        ]
+      },
+      "channels": [
+        "slack"
+      ]
+    }
+  ]
+}

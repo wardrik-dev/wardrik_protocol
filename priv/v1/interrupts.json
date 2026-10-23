@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:interrupts",
+  "title": "Calls waiting",
+  "description": "What interrupts.list answers: the calls agents wait on a person for, each with its agent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "interrupts"
+  ],
+  "properties": {
+    "interrupts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "agent",
+          "interrupt"
+        ],
+        "properties": {
+          "agent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The agent's ID: org/name, or org/@user/name for one that works for a user."
+              }
+            }
+          },
+          "interrupt": {
+            "$ref": "urn:wardrik:schema:v1:defs#/$defs/interrupt"
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "interrupts": [
+        {
+          "agent": {
+            "id": "acme/triage"
+          },
+          "interrupt": {
+            "id": "toolu_01",
+            "reason": "tool_approval",
+            "message": "Open an issue?",
+            "tool_call_id": "toolu_01"
+          }
+        }
+      ]
+    }
+  ]
+}

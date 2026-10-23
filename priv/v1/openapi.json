@@ -1,0 +1,1271 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Wardrik",
+    "version": "1",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    },
+    "description": "Wardrik's operations. Each is named by its operationId, everywhere it's offered: over HTTP, in the CLI, as an agent's tool. x-wardrik-action is what a caller must be allowed to do, x-wardrik-effect whether it reads, changes or destroys, and x-wardrik-subject what it acts on: one agent, the agents patterns cover, or the deployment. An agent the caller reaches none of is answered as one that doesn't exist."
+  },
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Agents",
+      "description": "Talking to agents, and reading what they did."
+    },
+    {
+      "name": "Deployment",
+      "description": "The deployment itself."
+    }
+  ],
+  "paths": {
+    "/v1/agents": {
+      "get": {
+        "operationId": "agents.list",
+        "summary": "List the agents the patterns cover",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The agents.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agents"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "agents.forget",
+        "summary": "Forget every agent the patterns cover",
+        "description": "Each agent goes as agent.forget takes it: stopped, with its conversation, definition and triggers deleted.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.forget",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What it forgot, what it kept, and what it couldn't.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:forgotten"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/interrupts": {
+      "get": {
+        "operationId": "interrupts.list",
+        "summary": "List the calls agents wait on a person for",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Each call, with its agent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:interrupts"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/events": {
+      "get": {
+        "operationId": "events.list",
+        "summary": "Read the events of the agents the patterns cover",
+        "description": "A page reads after the cursor, from the start without one. A stream reads after the cursor, from what's written next without one. Where a log was trimmed past the cursor, a wardrik.events.dropped says so, and the log is read on from the oldest event it holds.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.events",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          },
+          {
+            "$ref": "#/components/parameters/types"
+          },
+          {
+            "$ref": "#/components/parameters/after"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of their logs after the cursor, or with Accept: text/event-stream their logs as server-sent events, after the cursor and then as they are written. Each event's id is the cursor after it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:events"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/events/head": {
+      "get": {
+        "operationId": "events.head",
+        "summary": "Read where the logs the patterns cover stand",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.events",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cursor at the end of every log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:cursor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}": {
+      "get": {
+        "operationId": "agent.read",
+        "summary": "Read what an agent is doing now",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Its snapshot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agent_snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "agent.define",
+        "summary": "Define an agent",
+        "description": "Starts the agent the definition describes, or brings the one running to it from its next turn. A definition put again replaces the last. A key nothing here supports yet answers not_supported, naming it.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.define",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:agent_definition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The agent, started, or brought to the definition from its next turn.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agent_snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "501": {
+            "$ref": "#/components/responses/NotSupported"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "agent.forget",
+        "summary": "Forget an agent",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.forget",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Forgotten: stopped, with its conversation, definition and triggers deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/messages": {
+      "post": {
+        "operationId": "agent.ask",
+        "summary": "Send an agent a message",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.ask",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:ask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The message, queued. The turn that answers it is in the agent's log, after the cursor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:asked"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/decisions": {
+      "post": {
+        "operationId": "agent.decide",
+        "summary": "Approve or reject the calls an agent waits on",
+        "description": "The decisions are taken together and recorded as the caller's. A rejection's reason is what the model is told in place of the call's answer. An approval's note is what it reads beside the answer.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.decide",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:decisions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Each call, approved or rejected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:decided"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/interrupts/{interrupt}/authorization": {
+      "get": {
+        "operationId": "agent.authorization",
+        "summary": "Read where a person authorizes a call",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.decide",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/interrupt"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The page, and the code to enter where one is needed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:authorization"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/cancel": {
+      "post": {
+        "operationId": "agent.cancel",
+        "summary": "Stop what an agent is doing",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.cancel",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Taken: the turn and what's queued behind it end, and the agent keeps running."
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/events": {
+      "get": {
+        "operationId": "agent.events",
+        "summary": "Read an agent's log",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.events",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/types"
+          },
+          {
+            "$ref": "#/components/parameters/after"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the log after the cursor, or with Accept: text/event-stream the log as server-sent events.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:events"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/timeline": {
+      "get": {
+        "operationId": "agent.timeline",
+        "summary": "Read an agent's conversation as a person reads it",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.events",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Each message sent, and each run that answered, oldest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:timeline"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/runs": {
+      "get": {
+        "operationId": "agent.runs",
+        "summary": "Read what an agent's runs did and cost",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.events",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Each run, newest first, and the totals.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:runs"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/deployment/audit": {
+      "get": {
+        "operationId": "audit.list",
+        "summary": "Read a page of what people changed",
+        "tags": [
+          "Deployment"
+        ],
+        "x-wardrik-action": "deployment.audit",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "deployment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/starting_after"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The changes after the sequence, oldest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:audit"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/interrupts/{interrupt}/approve": {
+      "post": {
+        "operationId": "agent.approve",
+        "summary": "Approve a call an agent waits on",
+        "description": "agent.decide with one approval. Recorded as the caller's.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.decide",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/interrupt"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:approve"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The call, approved or rejected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:decided"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/interrupts/{interrupt}/deny": {
+      "post": {
+        "operationId": "agent.deny",
+        "summary": "Reject a call an agent waits on",
+        "description": "agent.decide with one rejection. Recorded as the caller's.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.decide",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/interrupt"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:deny"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The call, approved or rejected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:decided"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/agents/cancel": {
+      "post": {
+        "operationId": "agents.cancel",
+        "summary": "Stop what every agent the patterns cover is doing",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.cancel",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Taken: the agents whose turn ends.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:cancelled"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/definition": {
+      "get": {
+        "operationId": "agent.definition",
+        "summary": "Read an agent's definition",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The definition last put, and the tools it names that offer nothing yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:definition_read"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/spawn": {
+      "post": {
+        "operationId": "agent.spawn",
+        "summary": "Start an agent",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.spawn",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The agent, running.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agent_answer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/stop": {
+      "post": {
+        "operationId": "agent.stop",
+        "summary": "Stop an agent",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.stop",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The agent, asleep until something asks it, with its conversation kept.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agent_answer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/conversation": {
+      "delete": {
+        "operationId": "agent.clear",
+        "summary": "Empty an agent's conversation",
+        "description": "Answers conflict while it runs a turn or waits on a person.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.clear",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Its snapshot, with nothing said.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:agent_snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/calls": {
+      "get": {
+        "operationId": "agent.calls",
+        "summary": "List the tool calls an agent is running",
+        "description": "Answers not_found while the agent sleeps.",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The calls, each with how long it has run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:calls"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent}/calls/{call}": {
+      "delete": {
+        "operationId": "agent.kill",
+        "summary": "Stop one tool call",
+        "tags": [
+          "Agents"
+        ],
+        "x-wardrik-action": "agent.cancel",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent"
+          },
+          {
+            "$ref": "#/components/parameters/call"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Stopped: the model is answered with an error, and the turn goes on."
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "agent": {
+        "name": "agent",
+        "in": "path",
+        "required": true,
+        "description": "The agent's ID, as acme/triage or acme/@jon/triage. Its slashes are sent as they are.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?/[^/@_\\s][^/\\s]*$"
+        }
+      },
+      "interrupt": {
+        "name": "interrupt",
+        "in": "path",
+        "required": true,
+        "description": "The id of the call the agent waits on.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "resources": {
+        "name": "resources",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "description": "Patterns of the agents to cover, as acme/agent/* or acme/@jon/*, given once for each. * stands for any run of characters, and ? for one. Every agent the caller reaches where left out.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "types": {
+        "name": "types",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "description": "The event types to read, as wardrik.run.completed, given once for each. Every type where left out. A wardrik.events.dropped comes whatever the types.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "after": {
+        "name": "after",
+        "in": "query",
+        "required": false,
+        "description": "The cursor to read after: a page's next, the id of an event a stream gave, or a snapshot's cursor.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "How many to read, 100 unless set.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "starting_after": {
+        "name": "starting_after",
+        "in": "query",
+        "required": false,
+        "description": "The sequence to read after, a page's next.",
+        "schema": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "call": {
+        "name": "call",
+        "in": "path",
+        "required": true,
+        "description": "The id of the tool call.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "Invalid": {
+        "description": "The input doesn't read: invalid_request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "No credential, or one that isn't known or has expired: unauthorized.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The caller may not do this: forbidden.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No such agent, or one the caller doesn't reach: not_found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "It conflicts with what's there, like a call the agent doesn't wait on: conflict.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      },
+      "NotSupported": {
+        "description": "What was asked isn't supported here yet.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "urn:wardrik:schema:v1:error"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A token, or what the host's authenticator takes."
+      }
+    }
+  }
+}

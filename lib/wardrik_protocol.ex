@@ -1,17 +1,43 @@
 defmodule WardrikProtocol do
   @moduledoc """
-  The JSON Schemas of Wardrik's events, as CloudEvents.
+  What Wardrik sends and takes: its events, as CloudEvents, and its operations, as OpenAPI.
 
       root = JSV.build!(WardrikProtocol.schema("run.started"))
       {:ok, _data} = JSV.validate(event["data"], root)
+
+      %{method: "post", path: "/v1/agents/{agent}/messages"} = WardrikProtocol.operation("agent.ask")
   """
 
   alias WardrikProtocol.Inline
+  alias WardrikProtocol.Operations
 
   @dir Application.app_dir(:wardrik_protocol, "priv/v1")
   @files @dir |> Path.join("*.json") |> Path.wildcard() |> Enum.sort()
-  @names Enum.map(@files, &Path.basename(&1, ".json"))
+  @names @files |> Enum.map(&Path.basename(&1, ".json")) |> List.delete("openapi")
   @events Enum.filter(@names, &String.contains?(&1, "."))
+  @document Operations.document(@dir)
+  @operations Operations.build(@document)
+
+  @typedoc """
+  An operation: its `id`, the `operationId`, where it's served over HTTP, the `action` a caller must
+  be allowed, its `effect` (`read`, `change` or `destructive`), its `subject` (`agent`, `agents` or
+  `deployment`), one `input` schema of its parameters and body together, and its `output` schema.
+  """
+  @type operation() :: %{
+          id: String.t(),
+          summary: String.t(),
+          description: String.t() | nil,
+          method: String.t(),
+          path: String.t(),
+          action: String.t(),
+          effect: String.t(),
+          subject: String.t(),
+          parameters: [%{name: String.t(), in: String.t()}],
+          input: map(),
+          status: pos_integer(),
+          output: map() | nil,
+          stream: boolean()
+        }
 
   for file <- @files, do: @external_resource(file)
 
@@ -37,6 +63,22 @@ defmodule WardrikProtocol do
   for name <- @names do
     def schema(unquote(name)), do: unquote(Macro.escape(Inline.schema(@dir, name)))
   end
+
+  @doc "Returns the OpenAPI document of every operation, with each schema put in its place."
+  @spec openapi() :: map()
+  def openapi, do: @document
+
+  @doc "Lists every operation, in the order of its path."
+  @spec operations() :: [operation()]
+  def operations, do: @operations
+
+  @doc "Returns the operation `id` names, like `agent.ask`, or `nil`."
+  @spec operation(String.t()) :: operation() | nil
+  for %{id: id} = operation <- @operations do
+    def operation(unquote(id)), do: unquote(Macro.escape(operation))
+  end
+
+  def operation(_id), do: nil
 
   @doc false
   def __mix_recompile__?,

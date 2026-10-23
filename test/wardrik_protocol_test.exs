@@ -33,11 +33,16 @@ defmodule WardrikProtocolTest do
              "urn:wardrik:schema:v1:run.started"
   end
 
+  defp names do
+    WardrikProtocol.dir()
+    |> Path.join("*.json")
+    |> Path.wildcard()
+    |> Enum.map(&Path.basename(&1, ".json"))
+    |> List.delete("openapi")
+  end
+
   test "builds every schema whole, with nothing left to resolve" do
-    for name <- [
-          "cloudevent",
-          "defs" | Enum.map(WardrikProtocol.types(), &String.trim_leading(&1, "wardrik."))
-        ] do
+    for name <- names() do
       schema = WardrikProtocol.schema(name)
       refute inspect(schema) =~ "$ref"
       assert %JSV.Root{} = JSV.build!(schema)
@@ -73,5 +78,98 @@ defmodule WardrikProtocolTest do
   test "has its files where it says, and needs no recompiling while they stay" do
     refute WardrikProtocol.__mix_recompile__?()
     assert File.exists?(Path.join(WardrikProtocol.dir(), "cloudevent.json"))
+  end
+
+  test "checks each schema's examples against it" do
+    for name <- names(),
+        example <- Map.get(WardrikProtocol.schema(name), "examples", []) do
+      assert valid?(name, example), "#{name}: #{inspect(example)}"
+    end
+  end
+
+  describe "operations" do
+    test "lists each once, by the operation id every surface names it by" do
+      ids = Enum.map(WardrikProtocol.operations(), & &1.id)
+
+      assert Enum.sort(ids) == ~w(
+               agent.approve agent.ask agent.authorization agent.calls agent.cancel agent.clear
+               agent.decide agent.define agent.definition agent.deny agent.events agent.forget
+               agent.kill agent.read agent.runs agent.spawn agent.stop agent.timeline
+               agents.cancel agents.forget agents.list audit.list events.head events.list
+               interrupts.list
+             )
+
+      assert WardrikProtocol.operation("agent.unknown") == nil
+    end
+
+    test "says where each is served, what it needs, and what it does" do
+      assert %{
+               method: "post",
+               path: "/v1/agents/{agent}/messages",
+               action: "agent.ask",
+               effect: "change",
+               subject: "agent",
+               status: 202,
+               stream: false,
+               parameters: [%{name: "agent", in: "path"}]
+             } = WardrikProtocol.operation("agent.ask")
+
+      assert %{stream: true, output: %{"required" => ["events", "next"]}} =
+               WardrikProtocol.operation("events.list")
+
+      assert %{output: nil} = WardrikProtocol.operation("agent.cancel")
+
+      for operation <- WardrikProtocol.operations() do
+        assert operation.effect in ~w(read change destructive)
+        assert operation.subject in ~w(agent agents deployment)
+        assert is_binary(operation.action)
+
+        for %{name: name, in: "path"} <- operation.parameters,
+            do: assert(operation.path =~ "{#{name}}")
+      end
+    end
+
+    test "takes its parameters and body as one input" do
+      input = JSV.build!(WardrikProtocol.operation("agent.ask").input)
+
+      assert {:ok, _input} = JSV.validate(%{"agent" => "acme/triage", "content" => "Hi"}, input)
+
+      assert {:ok, _input} =
+               JSV.validate(%{"agent" => "acme/@jon/triage", "content" => "Hi"}, input)
+
+      refute match?({:ok, _input}, JSV.validate(%{"content" => "Hi"}, input))
+      refute match?({:ok, _input}, JSV.validate(%{"agent" => "acme", "content" => "Hi"}, input))
+
+      refute match?(
+               {:ok, _input},
+               JSV.validate(%{"agent" => "acme/triage", "content" => "Hi", "parts" => []}, input)
+             )
+
+      events = JSV.build!(WardrikProtocol.operation("events.list").input)
+      assert {:ok, _input} = JSV.validate(%{"resources" => ["acme/*"], "limit" => 5}, events)
+      refute match?({:ok, _input}, JSV.validate(%{"limit" => 501}, events))
+      refute match?({:ok, _input}, JSV.validate(%{"unknown" => 1}, events))
+    end
+
+    test "builds every input and output whole" do
+      for operation <- WardrikProtocol.operations(),
+          schema <- [operation.input, operation.output],
+          schema != nil do
+        refute inspect(schema) =~ "$ref"
+        assert %JSV.Root{} = JSV.build!(schema)
+      end
+    end
+
+    test "reads the same operations from its files as it compiled in" do
+      document = WardrikProtocol.Operations.document(WardrikProtocol.dir())
+
+      assert document == WardrikProtocol.openapi()
+      assert WardrikProtocol.Operations.build(document) == WardrikProtocol.operations()
+    end
+
+    test "keeps the whole document" do
+      assert %{"openapi" => "3.1.0", "paths" => paths} = WardrikProtocol.openapi()
+      assert Map.has_key?(paths, "/v1/agents/{agent}/messages")
+    end
   end
 end
