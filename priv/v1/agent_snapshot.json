@@ -41,6 +41,13 @@
       ],
       "description": "Whether it waits for a message, answers one, waits on a person, or sleeps until something asks it."
     },
+    "node": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The node it runs on, by its name; null while it sleeps."
+    },
     "pending": {
       "type": "integer",
       "minimum": 0
