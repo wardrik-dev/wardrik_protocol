@@ -1,22 +1,9 @@
 defmodule WardrikProtocol do
   @moduledoc """
-  The JSON Schemas of what Wardrik sends and takes: each event, as a CloudEvent.
-
-  Each schema is a file in `priv/v1`, with the `$id` `urn:wardrik:schema:v1:<file name>`:
-
-    * `<noun>.<verb>.json` is the `data` of the CloudEvent of type `wardrik.<noun>.<verb>`
-    * `cloudevent.json` is the envelope every event travels in
-    * `defs.json` holds the types they share, under `$defs`
-
-  `schema/1` returns one whole, with every `$ref` put in its place, so a validator needs no
-  resolver:
+  The JSON Schemas of Wardrik's events, as CloudEvents.
 
       root = JSV.build!(WardrikProtocol.schema("run.started"))
       {:ok, _data} = JSV.validate(event["data"], root)
-
-  An event marked `x-wardrik-live` is sent as it happens and never kept, like `message.delta`.
-
-  Reach for this when you produce or check Wardrik's events, or generate a client for them.
   """
 
   alias WardrikProtocol.Inline
