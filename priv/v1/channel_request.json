@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wardrik:schema:v1:channel_request",
+  "title": "A chat app's request",
+  "description": "What channel.deliver takes: the request a chat app sent, its raw body and its headers, with lowercase names. The surface that receives it passes them on as they came, since a signature covers the exact body.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "body",
+    "headers"
+  ],
+  "properties": {
+    "body": {
+      "type": "string",
+      "description": "The request's body, as it was sent."
+    },
+    "headers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "The request's headers, by lowercase name."
+    }
+  },
+  "examples": [
+    {
+      "body": "{\"type\":\"url_verification\",\"challenge\":\"3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P\"}",
+      "headers": {
+        "content-type": "application/json",
+        "x-slack-request-timestamp": "1531420618",
+        "x-slack-signature": "v0=a2114d57b48eac39b9ad189dd8316235a7b4a8d21a10bd27519666489c69b503"
+      }
+    }
+  ]
+}

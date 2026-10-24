@@ -97,7 +97,8 @@ defmodule WardrikProtocolTest do
                agent.kill agent.move agent.read agent.runs agent.spawn agent.stop agent.timeline
                agent.trigger_remove agent.trigger_set agents.cancel agents.forget agents.list
                audit.list connections.connect connections.disconnect connections.list
-               deployment.nodes deployment.reload events.head events.list hook.deliver hook.deliver_with_secret interrupts.list
+               channel.deliver deployment.nodes deployment.reload events.head events.list hook.deliver
+               hook.deliver_with_secret interrupts.list
                mcp_servers.add mcp_servers.list mcp_servers.remove tokens.create tokens.list
                tokens.revoke
              )
@@ -124,7 +125,7 @@ defmodule WardrikProtocolTest do
 
       for operation <- WardrikProtocol.operations() do
         assert operation.effect in ~w(read change destructive)
-        assert operation.subject in ~w(agent agents deployment hook owner)
+        assert operation.subject in ~w(agent agents channel deployment hook owner)
         assert is_binary(operation.action)
 
         for %{name: name, in: "path"} <- operation.parameters,
@@ -139,6 +140,17 @@ defmodule WardrikProtocolTest do
 
       assert {:ok, _input} =
                JSV.validate(%{"agent" => "acme/@jon/triage", "content" => "Hi"}, input)
+
+      assert {:ok, _input} =
+               JSV.validate(%{"agent" => "acme/triage/C1-1696.1234", "content" => "Hi"}, input)
+
+      assert {:ok, _input} =
+               JSV.validate(%{"agent" => "acme/@jon/triage/1696.1234", "content" => "Hi"}, input)
+
+      refute match?(
+               {:ok, _input},
+               JSV.validate(%{"agent" => "a/b/c/d", "content" => "Hi"}, input)
+             )
 
       refute match?({:ok, _input}, JSV.validate(%{"content" => "Hi"}, input))
       refute match?({:ok, _input}, JSV.validate(%{"agent" => "acme", "content" => "Hi"}, input))

@@ -1819,6 +1819,58 @@
           }
         }
       }
+    },
+    "/v1/channels/{channel}/{path}": {
+      "post": {
+        "operationId": "channel.deliver",
+        "summary": "Deliver a chat app's request to a channel",
+        "description": "Hands a request a chat app such as Slack sent to the channel of that name, as it came. The channel checks it by what it carries, such as a signature over the body, and answers it as the chat app expects. not_found where no channel of that name takes requests.",
+        "tags": [
+          "Channels"
+        ],
+        "x-wardrik-action": "channel.deliver",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "channel",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/channel"
+          },
+          {
+            "$ref": "#/components/parameters/path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:channel_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The channel's answer, as the chat app expects it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:channel_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1827,10 +1879,10 @@
         "name": "agent",
         "in": "path",
         "required": true,
-        "description": "The agent's ID, as acme/triage or acme/@jon/triage. Its slashes are sent as they are.",
+        "description": "The agent's ID, as acme/triage or acme/@jon/triage, or one of its conversations, as acme/triage/C1-1696.1234, which runs on the agent's definition with a history of its own. Its slashes are sent as they are. A conversation is reached through the operations, not over HTTP.",
         "schema": {
           "type": "string",
-          "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?/[^/@_\\s][^/\\s]*$"
+          "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?/[^/@_\\s][^/\\s]*(/[^/@_\\s][^/\\s]*)?$"
         }
       },
       "interrupt": {
@@ -1965,6 +2017,26 @@
         "description": "The token's id.",
         "schema": {
           "type": "string"
+        }
+      },
+      "channel": {
+        "name": "channel",
+        "in": "path",
+        "required": true,
+        "description": "The channel's name, as the Wardrik was given it.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[^/\\s]+$"
+        }
+      },
+      "path": {
+        "name": "path",
+        "in": "path",
+        "required": true,
+        "description": "What the chat app sends to, within the channel, as events.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[^/\\s]+$"
         }
       }
     },

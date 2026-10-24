@@ -21,9 +21,10 @@ defmodule WardrikProtocol do
   @typedoc """
   An operation: its `id`, the `operationId`, where it's served over HTTP, the `action` a caller must
   be allowed, its `effect` (`read`, `change` or `destructive`), its `subject` (`agent`, `agents`,
-  `deployment`, `owner` for an org's or a person's accounts and servers, or `hook` for a request
-  that proves itself with a secret in place of a caller), one
-  `input` schema of its parameters and body together, and its `output` schema.
+  `deployment`, `owner` for an org's or a person's accounts and servers, `hook` for a request
+  that proves itself with a secret in place of a caller, or `channel` for a chat app's request,
+  which its channel checks), one `input` schema of its parameters and body together, and its
+  `output` schema.
   """
   @type operation() :: %{
           id: String.t(),
