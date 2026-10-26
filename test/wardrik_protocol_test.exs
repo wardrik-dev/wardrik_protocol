@@ -99,7 +99,8 @@ defmodule WardrikProtocolTest do
                audit.list channel.deliver connections.connect connections.disconnect connections.list
                deployment.nodes deployment.reload events.head events.list hook.deliver
                hook.deliver_with_secret interrupts.list
-               mcp_servers.add mcp_servers.list mcp_servers.remove tokens.create tokens.list
+               mcp_servers.add mcp_servers.list mcp_servers.remove secrets.delete secrets.list
+               secrets.put tokens.create tokens.list
                tokens.revoke
              )
 
