@@ -1572,13 +1572,18 @@
       "get": {
         "operationId": "tokens.list",
         "summary": "List the API tokens",
+        "description": "Every token, oldest first, never a secret. With resources, only the tokens whose every resource the patterns cover, as acme/agent/* lists the tokens over acme's agents alone.",
         "tags": [
           "Tokens"
         ],
         "x-wardrik-action": "deployment.tokens",
         "x-wardrik-effect": "read",
         "x-wardrik-subject": "deployment",
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Every token, never a secret.",
@@ -1607,7 +1612,7 @@
       "post": {
         "operationId": "tokens.create",
         "summary": "Make an API token",
-        "description": "The token acts for whoever makes it, and is kept as the SHA-256 of its secret. It works for 90 days, or expires_in seconds.",
+        "description": "The token acts for whoever makes it, and is kept as the SHA-256 of its secret. It works for 90 days, or expires_in seconds. It is no wider than its maker: each action its roles allow, on each resource it names, is one its maker may take there; it is held to its maker's policy where its maker is held to one; and it expires no later than its maker does.",
         "tags": [
           "Tokens"
         ],
