@@ -337,6 +337,7 @@
           "enum": [
             "tool_approval",
             "model_approval",
+            "ceiling_approval",
             "authorization",
             "in_doubt"
           ]
