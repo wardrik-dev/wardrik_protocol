@@ -26,7 +26,7 @@ defmodule WardrikProtocolTest do
     do: match?({:ok, _value}, JSV.validate(value, JSV.build!(WardrikProtocol.schema(name))))
 
   test "lists every event's type" do
-    assert Enum.count(WardrikProtocol.types()) == 50
+    assert Enum.count(WardrikProtocol.types()) == 51
     assert "wardrik.run.started" in WardrikProtocol.types()
 
     assert WardrikProtocol.dataschema("wardrik.run.started") ==
@@ -64,6 +64,7 @@ defmodule WardrikProtocolTest do
              "wardrik.activity.changed",
              "wardrik.message.delta",
              "wardrik.reasoning.delta",
+             "wardrik.subagent.progress",
              "wardrik.tool_call.progress"
            ]
   end

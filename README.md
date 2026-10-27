@@ -28,7 +28,7 @@ Each schema is a file in `priv/v1`, with the `$id` `urn:wardrik:schema:v1:<file 
 | any other | what an operation takes or answers, like `ask.json` and `agent_snapshot.json` |
 
 A schema marked `"x-wardrik-live": true` is an event sent as it happens and never kept:
-`activity.changed`, `message.delta`, `reasoning.delta` and `tool_call.progress`.
+`activity.changed`, `message.delta`, `reasoning.delta`, `subagent.progress` and `tool_call.progress`.
 
 ## Check an event
 
