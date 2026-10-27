@@ -1997,6 +1997,48 @@
           }
         }
       }
+    },
+    "/v1/ceilings": {
+      "get": {
+        "operationId": "ceilings.list",
+        "summary": "List an org's ceilings",
+        "description": "Each budget the org's agents spend from together, with its limit, what they've spent against it in its period now, what approvals granted, and when it starts over.",
+        "tags": [
+          "Ceilings"
+        ],
+        "x-wardrik-action": "ceiling.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The org's ceilings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:ceilings"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {

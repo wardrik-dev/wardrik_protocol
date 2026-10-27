@@ -96,7 +96,7 @@ defmodule WardrikProtocolTest do
                agent.decide agent.define agent.definition agent.deny agent.events agent.forget
                agent.kill agent.move agent.read agent.runs agent.spawn agent.stop agent.timeline
                agent.trigger_remove agent.trigger_set agents.cancel agents.forget agents.list
-               audit.list channel.deliver connections.connect connections.disconnect connections.list
+               audit.list ceilings.list channel.deliver connections.connect connections.disconnect connections.list
                deployment.nodes deployment.reload events.head events.list hook.deliver
                hook.deliver_with_secret interrupts.list
                mcp_servers.add mcp_servers.list mcp_servers.remove secrets.delete secrets.list
