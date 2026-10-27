@@ -40,6 +40,17 @@
         "null"
       ],
       "description": "The node it runs on, by its name; null while it sleeps."
+    },
+    "next_run": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "When the next of its triggers on a clock runs; null where none does."
+    },
+    "spent_today": {
+      "$ref": "urn:wardrik:schema:v1:defs#/$defs/spent"
     }
   },
   "examples": [

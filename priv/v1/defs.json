@@ -485,6 +485,27 @@
         "pending"
       ],
       "description": "What an agent is doing now."
+    },
+    "spent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tokens",
+        "usd"
+      ],
+      "properties": {
+        "tokens": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The tokens its model calls took."
+        },
+        "usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The dollars its model calls and tools cost, where they had a price."
+        }
+      },
+      "description": "What an agent's model calls and tools spent today, by the UTC day."
     }
   }
 }

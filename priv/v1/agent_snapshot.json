@@ -65,6 +65,17 @@
     "cursor": {
       "type": "string",
       "description": "Where its log stands, as events.list and agent.events take it."
+    },
+    "next_run": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "When the next of its triggers on a clock runs; null where none does."
+    },
+    "spent_today": {
+      "$ref": "urn:wardrik:schema:v1:defs#/$defs/spent"
     }
   },
   "examples": [
