@@ -380,6 +380,7 @@
             "wardrik.message.retrying",
             "wardrik.step.started",
             "wardrik.tool_call.started",
+            "wardrik.tool_call.retrying",
             "wardrik.tool_call.completed",
             "wardrik.tool_call.denied"
           ],
