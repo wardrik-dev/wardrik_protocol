@@ -1697,14 +1697,18 @@
       "post": {
         "operationId": "deployment.reload",
         "summary": "Read every agent's definition again",
-        "description": "Each awake agent takes its definition as it reads now from its next turn, and each sleeping one as it wakes. The node that answers reads its servers and triggers again too.",
+        "description": "Each awake agent takes its definition as it reads now from its next turn, and each sleeping one as it wakes. With resources, only the agents the patterns cover are brought to theirs. The node that answers reads its declarations, servers and triggers again too.",
         "tags": [
           "Deployment"
         ],
         "x-wardrik-action": "deployment.reload",
         "x-wardrik-effect": "change",
         "x-wardrik-subject": "deployment",
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resources"
+          }
+        ],
         "responses": {
           "200": {
             "description": "The nodes that read them.",
@@ -2047,10 +2051,10 @@
         "name": "agent",
         "in": "path",
         "required": true,
-        "description": "The agent's ID, as acme/triage or acme/@jon/triage, or one of its conversations, as acme/triage/C1-1696.1234, which runs on the agent's definition with a history of its own. Its slashes are sent as they are, and a conversation's last segment follows conversations/, as acme/triage/conversations/C1-1696.1234.",
+        "description": "The agent's ID, as acme/triage or acme/@jon/triage, or one of its conversations, as acme/triage/C1-1696.1234, which runs on the agent's definition with a history of its own. Its slashes are sent as they are, and a conversation's last segment follows conversations/, as acme/triage/conversations/C1-1696.1234. No segment holds a colon, which names a person known elsewhere, as slack:T0123/U024BE7LH.",
         "schema": {
           "type": "string",
-          "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?/[^/@_\\s][^/\\s]*(/[^/@_\\s][^/\\s]*)?$"
+          "pattern": "^[^/@_:\\s][^/:\\s]*(/@[^/@_:\\s][^/:\\s]*)?/[^/@_:\\s][^/:\\s]*(/[^/@_:\\s][^/:\\s]*)?$"
         }
       },
       "interrupt": {
@@ -2153,10 +2157,10 @@
         "name": "owner",
         "in": "query",
         "required": true,
-        "description": "The owner, as acme for an org or acme/@jon for a person.",
+        "description": "The owner, as acme for an org or acme/@jon for a person. Neither holds a colon.",
         "schema": {
           "type": "string",
-          "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?$"
+          "pattern": "^[^/@_:\\s][^/:\\s]*(/@[^/@_:\\s][^/:\\s]*)?$"
         }
       },
       "provider": {
