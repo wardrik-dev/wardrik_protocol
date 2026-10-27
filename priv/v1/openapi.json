@@ -2005,7 +2005,7 @@
         "name": "agent",
         "in": "path",
         "required": true,
-        "description": "The agent's ID, as acme/triage or acme/@jon/triage, or one of its conversations, as acme/triage/C1-1696.1234, which runs on the agent's definition with a history of its own. Its slashes are sent as they are. A conversation is reached through the operations, not over HTTP.",
+        "description": "The agent's ID, as acme/triage or acme/@jon/triage, or one of its conversations, as acme/triage/C1-1696.1234, which runs on the agent's definition with a history of its own. Its slashes are sent as they are, and a conversation's last segment follows conversations/, as acme/triage/conversations/C1-1696.1234.",
         "schema": {
           "type": "string",
           "pattern": "^[^/@_\\s][^/\\s]*(/@[^/@_\\s][^/\\s]*)?/[^/@_\\s][^/\\s]*(/[^/@_\\s][^/\\s]*)?$"
