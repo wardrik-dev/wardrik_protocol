@@ -61,7 +61,8 @@ defmodule WardrikProtocol.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jsv, "~> 0.26", only: :test},
+      {:wardrik_core, path: "../wardrik_core"},
+      {:jsv, "~> 0.26"},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_slop, "~> 0.4", only: [:dev, :test], runtime: false},

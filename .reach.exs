@@ -1,10 +1,11 @@
 [
   layers: [
-    protocol: ["WardrikProtocol", "WardrikProtocol.*"]
+    protocol: ["WardrikProtocol", "WardrikProtocol.*"],
+    surface: ["Wardrik.*"]
   ],
   calls: [
     forbidden: [
-      {["WardrikProtocol", "WardrikProtocol.*"],
+      {["WardrikProtocol", "WardrikProtocol.*", "Wardrik.*"],
        [
          "Application.get_env",
          "Application.fetch_env",
@@ -13,6 +14,9 @@
          "Application.delete_env"
        ]}
     ]
+  ],
+  smells: [
+    ignore: [modules: ["Wardrik.Operations.Functions"]]
   ],
   checks: [
     layer_coverage: [require_all_modules: true, forbid_multiple_matches: true]
