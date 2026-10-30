@@ -42,7 +42,7 @@ defmodule Wardrik.ServerTest do
     assert {:waiting, [%Wardrik.Interrupt{id: "c1"}]} =
              Wardrik.Agent.reply(scope, "acme/waiting", "hi")
 
-    assert {:error, %Wardrik.Error{type: :unavailable, message: "The run failed: :boom"}} =
+    assert {:error, %Wardrik.Error{type: :unavailable, message: "The run failed: It broke."}} =
              Wardrik.Agent.reply(scope, "acme/broken", "hi")
 
     assert scope |> Wardrik.Agent.stream("acme/triage", "hi") |> Enum.join() == "Re: hi"

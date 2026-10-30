@@ -19,7 +19,7 @@ defmodule Wardrik.Server do
   Sends `input` to `agent` and streams its answer, in order:
 
     1. `{:text, chunk}`, any number of times.
-    2. One of `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, reason}`.
+    2. One of `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, why}`.
 
   Raises `Wardrik.Error` if the agent can't be reached.
   """

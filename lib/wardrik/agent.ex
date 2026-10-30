@@ -52,7 +52,7 @@ defmodule Wardrik.Agent do
   With `to: pid`, returns `{:ok, ref}` and sends `pid` each item as `{Wardrik, ref, item}`:
 
     1. `{:text, chunk}`, any number of times.
-    2. One of `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, reason}`.
+    2. One of `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, why}`.
 
   ## Options
 
@@ -108,8 +108,8 @@ defmodule Wardrik.Agent do
   defp ended({:done, reply}, _acc), do: {:ok, reply}
   defp ended({:waiting, interrupts}, _acc), do: {:waiting, interrupts}
 
-  defp ended({:failed, reason}, _acc),
-    do: {:error, Wardrik.Error.new(:unavailable, "The run failed: #{inspect(reason)}")}
+  defp ended({:failed, why}, _acc),
+    do: {:error, Wardrik.Error.new(:unavailable, "The run failed: #{why}")}
 
   defp ended({:text, _chunk}, acc), do: acc
 
