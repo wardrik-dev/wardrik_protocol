@@ -1,5 +1,5 @@
 defmodule Wardrik.Call do
-  @moduledoc "A tool call an agent is running: its `id`, the tool's `name`, and how long it has run."
+  @moduledoc "A tool call an agent is running: its `id`, the tool's `name`, and `elapsed_ms`."
 
   use Wardrik.Type,
     schema: ["calls", "properties", "calls", "items"],

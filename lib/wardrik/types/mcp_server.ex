@@ -1,7 +1,7 @@
 defmodule Wardrik.MCPServer do
   @moduledoc """
-  An MCP server an owner added for their agents: its `name`, its `url`, and how its agents sign in
-  to it, `:oauth`, `:secret` or `:none`.
+  An MCP server an owner added for their agents: its `name`, `url`, and `auth`. `auth` is how
+  agents sign in to it: `:oauth`, `:secret` or `:none`.
   """
 
   use Wardrik.Type,
@@ -11,8 +11,8 @@ end
 
 defmodule Wardrik.MCPServerAdded do
   @moduledoc """
-  An MCP server just added: whether its agents can call it now, or the `authorization` where
-  someone signs in to it first.
+  The result of adding an MCP server. If it isn't `connected` yet, `authorization` says where
+  someone signs in first.
   """
 
   use Wardrik.Type,

@@ -1,8 +1,12 @@
 defmodule Wardrik.Trigger do
   @moduledoc """
-  A trigger asks an agent something without anyone typing: `every` cron expression or interval,
-  read in `timezone`, when one of its `feed` URLs has new entries, or when a service sends its
-  `webhook` a request. See the Trigger agents guide.
+  Asks an agent something without anyone typing. A trigger fires:
+
+    * on a schedule, `every` cron expression or interval, read in `timezone`
+    * when one of its `feed` URLs has new entries
+    * when a service sends its `webhook` a request
+
+  See the Trigger agents guide.
   """
 
   use Wardrik.Type,
@@ -23,8 +27,8 @@ end
 
 defmodule Wardrik.Trigger.Webhook do
   @moduledoc """
-  Where a service sends a trigger requests: the `secret` it holds, as `${NAME}`, and how a request
-  proves it, `:shared` or `:standard`.
+  Where a service sends a trigger requests. `secret` is the secret it holds, as `${NAME}`.
+  `verify` is how a request proves it: `:shared` or `:standard`.
   """
 
   use Wardrik.Type,

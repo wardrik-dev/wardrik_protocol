@@ -1,8 +1,11 @@
 defmodule Wardrik.Activity do
   @moduledoc """
-  What an agent is doing now, since when, and how many messages wait behind it. `doing` is every
-  tool call running, oldest first, or the one thing it's doing otherwise, each as the protocol's
-  `doing` map.
+  What an agent is doing now.
+
+    * `:doing` - every tool call running, oldest first, or else the one thing it's doing. Each is
+      the protocol's `doing` map.
+    * `:since` - when it started.
+    * `:pending` - how many messages wait behind it.
   """
 
   use Wardrik.Type,

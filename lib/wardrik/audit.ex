@@ -1,6 +1,6 @@
 defmodule Wardrik.Audit do
   @moduledoc """
-  The operations on the deployment's audit.
+  Operations on the deployment's audit log.
 
       Wardrik.Audit.list(scope, limit: 50)
       #=> {:ok, %Wardrik.Page{events: [%Wardrik.Event{type: "wardrik.agent.defined", ...}], next: 1}}

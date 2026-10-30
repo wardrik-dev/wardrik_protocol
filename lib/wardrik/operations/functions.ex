@@ -46,7 +46,7 @@ defmodule Wardrik.Operations.Functions do
 
   defp stream(operation) do
     lead =
-      "#{operation.summary}, as a stream of `{%Wardrik.Event{}, cursor}` that reads on and then follows"
+      "#{operation.summary}, then follow new events as they arrive. Returns `{:ok, stream}` of `{%Wardrik.Event{}, cursor}` pairs."
 
     define(
       operation,

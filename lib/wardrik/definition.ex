@@ -1,7 +1,6 @@
 defmodule Wardrik.Definition do
   @moduledoc """
-  A definition says what an agent is and what it may do, as an agent file's frontmatter does, with
-  the keys the protocol's `agent_definition` gives it. Build one with `new!/1`:
+  What an agent is and what it may do: an agent file's frontmatter, as a struct.
 
       definition =
         Wardrik.Definition.new!(
@@ -14,9 +13,11 @@ defmodule Wardrik.Definition do
       Wardrik.Agent.define(scope, "acme/triage", definition)
       #=> {:ok, %Wardrik.Agent{id: "acme/triage", status: :idle, ...}}
 
-  Each tool and policy it names is one the Wardrik offers; see `Wardrik.start_link/1`. `policy`,
-  `workspace`, `context`, `retries`, `compaction` and `notify` are kept as the protocol writes them,
-  and each of `triggers` is a `Wardrik.Trigger`.
+  Its fields follow the protocol's `agent_definition` schema. Tools and policies it names must be
+  ones Wardrik offers. See `Wardrik.start_link/1`.
+
+  `:policy`, `:workspace`, `:context`, `:retries`, `:compaction` and `:notify` stay as the
+  protocol's JSON. Each of `:triggers` is a `Wardrik.Trigger`.
   """
 
   use Wardrik.Type,
@@ -46,7 +47,7 @@ defmodule Wardrik.Definition do
 
   @schema JSV.build!(WardrikProtocol.schema("agent_definition"))
 
-  @doc "Builds a definition from a keyword list or a map. Raises if it doesn't read."
+  @doc "Builds a definition from a keyword list or map. Raises `ArgumentError` if it doesn't match the schema."
   @spec new!(keyword() | map()) :: t()
   def new!(fields) do
     json = Type.json(fields)
@@ -57,7 +58,11 @@ defmodule Wardrik.Definition do
     end
   end
 
-  @doc "Returns the definition with each of its triggers named, `trigger-1` and so on by its place unless it says."
+  @doc """
+  Names each unnamed trigger by its position: `trigger-1`, `trigger-2`, and so on.
+
+  Takes and returns the definition as the protocol's JSON.
+  """
   @spec named(map()) :: map()
   def named(%{"triggers" => triggers} = definition) do
     named =
@@ -70,7 +75,11 @@ defmodule Wardrik.Definition do
 
   def named(definition), do: definition
 
-  @doc "Returns who the agent `id` acts as: its user, as `acme/@maria`, or its org, as `acme`."
+  @doc """
+  Returns the principal the agent `id` acts as: its user, as `acme/@maria`, or its org, as `acme`.
+
+  Raises `MatchError` if `id` isn't an agent ID.
+  """
   @spec principal(String.t()) :: Principal.t()
   def principal(id) do
     {:ok, %AgentID{owner: owner}} = AgentID.parse(id)

@@ -1,11 +1,22 @@
 defmodule Wardrik.Scope do
   @moduledoc """
-  Who acts through a Wardrik, and on which: the `server` that runs its operations, the Wardrik by
-  name, the principal, and the grants its authorizer reads to decide what they may do. `Wardrik.as/3`
-  makes one, and `Wardrik.grant/2` adds to it. A scope a token makes names the `policy` every agent
-  it defines is held to. An agent's scope carries the `labels` of what its run had read, which the
-  messages it sends carry too. A scope a token makes `expires` when it does. While an operation
-  runs, it names the operation too.
+  Who is acting through Wardrik, and what they may do.
+
+      scope = MyApp.Wardrik.as("acme/@maria", roles: [:owner], resources: ["acme/@maria/*"])
+
+  `Wardrik.as/3` makes a scope. `Wardrik.grant/2` adds to it.
+
+  ## Fields
+
+    * `:server` - the `Wardrik.Server` that runs its operations.
+    * `:wardrik` - which Wardrik, by name.
+    * `:principal` - who is acting.
+    * `:grants` - what the authorizer reads to decide what they may do.
+    * `:policy` - in a token's scope, the policy every agent it defines is held to.
+    * `:expires` - in a token's scope, when the token expires.
+    * `:labels` - in an agent's scope, the labels of what its run has read. Messages it sends
+      carry them too.
+    * `:operation` - the operation running, while one runs.
   """
 
   alias Wardrik.Statement
@@ -26,8 +37,9 @@ defmodule Wardrik.Scope do
         }
 
   @doc """
-  Returns the scope `principal` acts in on the Wardrik named `wardrik`, which `server` runs, allowed
-  what `grants` say: a list of `Wardrik.Statement`s, or the options of one.
+  Returns a scope for `principal` on `wardrik`, run by `server`.
+
+  `grants` is a list of `Wardrik.Statement`s, or the options for one.
   """
   @spec new(module(), atom(), Principal.t() | String.t(), term()) :: t()
   def new(server, wardrik, principal, grants \\ [])
@@ -43,16 +55,16 @@ defmodule Wardrik.Scope do
   def new(server, wardrik, id, grants) when is_binary(id),
     do: new(server, wardrik, %Principal{id: id}, grants)
 
-  @doc "Returns the scope allowed what the statement `opts` describe too."
+  @doc "Adds a statement built from `opts` to the scope's grants. See `Wardrik.Statement.new/1`."
   @spec grant(t(), keyword()) :: t()
   def grant(%__MODULE__{grants: grants} = scope, opts) when is_list(grants),
     do: %{scope | grants: grants ++ [Statement.new(opts)]}
 
-  @doc "Runs the operation `id` with `input` through the scope's server."
+  @doc "Runs operation `id` with `input` through the scope's server."
   @spec run(t(), String.t(), map()) :: {:ok, term()} | {:error, Wardrik.Error.t()}
   def run(%__MODULE__{server: server} = scope, id, input), do: server.run(scope, id, input)
 
-  @doc "Streams the operation `id` with `input` through the scope's server."
+  @doc "Streams operation `id` with `input` through the scope's server."
   @spec stream(t(), String.t(), map()) :: {:ok, Enumerable.t()} | {:error, Wardrik.Error.t()}
   def stream(%__MODULE__{server: server} = scope, id, input), do: server.stream(scope, id, input)
 

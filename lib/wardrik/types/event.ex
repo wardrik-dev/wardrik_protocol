@@ -1,7 +1,8 @@
 defmodule Wardrik.Event do
   @moduledoc """
-  One event, as a CloudEvent: its `type`, like `"wardrik.run.completed"`, what it's about, and its
-  `data`, as the protocol's schema for its type describes it.
+  One event, as a CloudEvent.
+
+  `type` is like `"wardrik.run.completed"`. `data` follows the protocol's schema for that type.
   """
 
   use Wardrik.Type,

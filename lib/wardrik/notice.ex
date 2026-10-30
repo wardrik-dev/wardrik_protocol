@@ -1,13 +1,13 @@
 defmodule Wardrik.Notice do
   @moduledoc """
-  A notice tells someone what an agent did while nobody watched. Its `kind` is one of:
+  Tells someone what an agent did while nobody watched.
 
-    * `:parked`, a turn waits on a person for `calls`, each a `Wardrik.Interrupt` with the
-      `arguments` the model wrote, where they're known
-    * `:failed`, a turn failed, for `reason`
-    * `:finished`, a turn answered, and `text` is what it said
+  `agent` is the agent's ID. `at` is when it happened. `kind` is one of:
 
-  `agent` is the agent's ID, and `at` when it happened.
+    * `:parked` - a turn waits on a person. `calls` lists each `Wardrik.Interrupt`, with the
+      `arguments` the model wrote, where known.
+    * `:failed` - a turn failed. `reason` says why.
+    * `:finished` - a turn answered. `text` is the answer.
   """
 
   @enforce_keys [:agent, :kind, :at]
@@ -15,7 +15,7 @@ defmodule Wardrik.Notice do
 
   @type kind() :: :parked | :failed | :finished
 
-  @typedoc "A call a parked turn waits on, and its arguments."
+  @typedoc "A call a parked turn waits on, with its arguments."
   @type call() :: %{interrupt: Wardrik.Interrupt.t(), arguments: term()}
 
   @type t() :: %__MODULE__{
@@ -27,12 +27,12 @@ defmodule Wardrik.Notice do
           text: String.t() | nil
         }
 
-  @doc "Returns every kind a notice may be."
+  @doc "Returns every kind of notice."
   @spec kinds() :: [kind()]
   def kinds, do: [:parked, :failed, :finished]
 
   @doc """
-  Returns the notice as JSON, as a webhook is sent it.
+  Returns the notice as the JSON a webhook receives.
 
       Wardrik.Notice.json(notice)
       #=> %{"event" => "turn_failed", "agent" => "acme/triage", "reason" => "It timed out.", ...}
@@ -49,7 +49,7 @@ defmodule Wardrik.Notice do
     }
   end
 
-  @doc "Returns the event a notice is sent as: `turn_parked`, `turn_failed` or `turn_finished`."
+  @doc "Returns the notice's event name: `turn_parked`, `turn_failed` or `turn_finished`."
   @spec event(t()) :: String.t()
   def event(%__MODULE__{kind: kind}), do: "turn_#{kind}"
 

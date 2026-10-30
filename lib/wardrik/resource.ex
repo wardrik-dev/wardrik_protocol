@@ -1,9 +1,14 @@
 defmodule Wardrik.Resource do
   @moduledoc """
-  A resource names what an action acts on, as IAM names one: `acme/agent/triage` is the agent
-  `acme/triage`, `acme/@jon/agent/triage` is `acme/@jon/triage`, `acme/mcp_server/linear` is the org's
-  MCP server `linear`, `acme/@jon/connection/github` is Jon's GitHub account, and `deployment` is
-  the deployment.
+  Names what an action acts on, as IAM resources do.
+
+  | Resource | Names |
+  | --- | --- |
+  | `acme/agent/triage` | the agent `acme/triage` |
+  | `acme/@jon/agent/triage` | the agent `acme/@jon/triage` |
+  | `acme/mcp_server/linear` | the org's MCP server `linear` |
+  | `acme/@jon/connection/github` | Jon's GitHub account |
+  | `deployment` | the deployment |
   """
 
   alias Wardrik.AgentID
@@ -11,8 +16,13 @@ defmodule Wardrik.Resource do
   @deployment "deployment"
 
   @doc """
-  Returns the resource of the agent `id`, or `:error` when it isn't an agent's ID. A conversation's
-  is its agent's with the conversation after it, as `acme/agent/triage/conversation/C1-1696.1234`.
+  Returns the resource for the agent `id`, or `:error` if it isn't an agent ID.
+
+      Wardrik.Resource.agent("acme/triage")
+      #=> {:ok, "acme/agent/triage"}
+
+      Wardrik.Resource.agent("acme/triage/C1-1696.1234")
+      #=> {:ok, "acme/agent/triage/conversation/C1-1696.1234"}
   """
   @spec agent(String.t()) :: {:ok, String.t()} | :error
   def agent(id) do
@@ -28,7 +38,12 @@ defmodule Wardrik.Resource do
     end
   end
 
-  @doc "Returns the resource of what `owner` holds: its `kind`, and the one named, if any."
+  @doc """
+  Returns the resource for something `owner` holds: every item of `kind`, or the one `name`d.
+
+      Wardrik.Resource.owned("acme", "mcp_server", "linear")
+      #=> "acme/mcp_server/linear"
+  """
   @spec owned(String.t(), String.t(), String.t() | nil) :: String.t()
   def owned(owner, kind, nil), do: owner <> "/" <> kind
   def owned(owner, kind, name), do: owner <> "/" <> kind <> "/" <> name

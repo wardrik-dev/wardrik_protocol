@@ -18,11 +18,11 @@ defmodule Wardrik.Type do
       @spec __fields__() :: keyword()
       def __fields__, do: unquote(Macro.escape(fields))
 
-      @doc "Reads one from the protocol's JSON."
+      @doc "Builds one from the protocol's JSON."
       @spec from_json(map()) :: t()
       def from_json(json), do: Wardrik.Type.decode(__MODULE__, __fields__(), json)
 
-      @doc "Writes it as the protocol's JSON, leaving out what it doesn't set."
+      @doc "Returns it as the protocol's JSON, without fields that are `nil`."
       @spec to_json(t()) :: map()
       def to_json(%__MODULE__{} = value), do: Wardrik.Type.encode(value, __fields__())
     end

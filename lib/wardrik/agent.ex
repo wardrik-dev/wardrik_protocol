@@ -1,6 +1,6 @@
 defmodule Wardrik.Agent do
   @moduledoc """
-  An agent, and the operations on one, from defining it and asking it to deciding what it waits on.
+  An agent, and the operations on one.
 
       Wardrik.Agent.ask(scope, "acme/triage", "What's on fire?")
       #=> {:ok, %Wardrik.Message{id: "msg_Xq3f...", cursor: "eyJhY21lL3RyaWFnZSI6NDF9"}}
@@ -8,9 +8,20 @@ defmodule Wardrik.Agent do
       Wardrik.Agent.read(scope, "acme/triage")
       #=> {:ok, %Wardrik.Agent{id: "acme/triage", status: :running, node: "wardrik@box1", pending: 0, ...}}
 
-  An agent is its `id` and `name`, its `status`, `:idle`, `:running`, `:parked` or `:asleep`, the
-  messages `pending` behind what it does, when its `next_run` is, what it has `spent_today`, its
-  `activity`, the `interrupts` it waits on a person for, and the `cursor` where its log stands. A list of agents leaves out what it doesn't read.
+  ## Fields
+
+    * `:id` - the agent's ID, as `"acme/triage"`.
+    * `:name` - its name.
+    * `:status` - `:idle`, `:running`, `:parked` or `:asleep`.
+    * `:node` - the node it runs on.
+    * `:pending` - how many messages wait behind the current one.
+    * `:next_run` - when it next runs.
+    * `:spent_today` - what it has spent today.
+    * `:activity` - what it's doing now. See `Wardrik.Activity`.
+    * `:interrupts` - the calls it waits on a person for. See `Wardrik.Interrupt`.
+    * `:cursor` - where its event log stands.
+
+  Agents from `Wardrik.Agents.list/2` leave out `:activity`, `:interrupts` and `:cursor`.
   """
 
   use Wardrik.Type,
@@ -31,14 +42,22 @@ defmodule Wardrik.Agent do
   use Wardrik.Operations.Functions, prefix: "agent"
 
   @doc """
-  Sends the agent a message, and streams its answer's text as it's written, until its run ends. It
-  raises a `Wardrik.Error` where the agent can't be reached. With `to: pid`, it sends `pid` what the
-  answer brings instead, as `{Wardrik, ref, item}`, and returns `{:ok, ref}`: `{:text, chunk}`,
-  then `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, reason}`.
+  Sends the agent a message and streams the text of its answer.
 
       scope |> Wardrik.Agent.stream("acme/triage", "What's on fire?") |> Enum.each(&IO.write/1)
 
-  Takes `:timeout`, how long to wait between what the answer brings, ten minutes unless set.
+  The stream ends when the run ends, including when it fails. Use `reply/4` to see how it ended.
+  Raises `Wardrik.Error` if the agent can't be reached.
+
+  With `to: pid`, returns `{:ok, ref}` and sends `pid` each item as `{Wardrik, ref, item}`:
+
+    1. `{:text, chunk}`, any number of times.
+    2. One of `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, reason}`.
+
+  ## Options
+
+    * `:to` - a pid to send the answer to, in place of returning a stream.
+    * `:timeout` - milliseconds to wait for each part of the answer. Ten minutes unless set.
   """
   @spec stream(Wardrik.Scope.t(), String.t() | t(), term(), keyword()) ::
           Enumerable.t() | {:ok, reference()}
@@ -50,11 +69,13 @@ defmodule Wardrik.Agent do
   end
 
   @doc """
-  Sends the agent a message, and returns its answer once its run ends: `{:ok, %Wardrik.Reply{}}`,
-  or `{:waiting, interrupts}` where it waits on a person first.
+  Sends the agent a message and returns its answer once the run ends.
 
       Wardrik.Agent.reply(scope, "acme/triage", "What's on fire?")
       #=> {:ok, %Wardrik.Reply{message: "msg_Xq3f...", run: "0af76519...", text: "Nothing's on fire."}}
+
+  Returns `{:waiting, interrupts}` if the run waits on a person. Returns `{:error, %Wardrik.Error{}}`
+  if the agent can't be reached or the run fails. Takes the `:timeout` option of `stream/4`.
   """
   @spec reply(Wardrik.Scope.t(), String.t() | t(), term(), keyword()) ::
           {:ok, Wardrik.Reply.t()}
@@ -95,7 +116,7 @@ defmodule Wardrik.Agent do
   defp text({:text, chunk}), do: [chunk]
   defp text(_ended), do: []
 
-  @doc "Reads one from an agent as a list gives it."
+  @doc "Builds an agent from one item of the `agents.list` output."
   @spec from_summary(map()) :: t()
   def from_summary(%{"id" => id, "name" => name} = summary),
     do:

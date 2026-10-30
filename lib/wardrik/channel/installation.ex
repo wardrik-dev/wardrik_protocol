@@ -1,7 +1,6 @@
 defmodule Wardrik.Channel.Installation do
   @moduledoc """
-  An installation is a channel added to one workspace, such as a Slack app added to one Slack
-  workspace.
+  A channel added to one workspace, such as a Slack app added to one Slack workspace.
 
       %Wardrik.Channel.Installation{
         channel: "slack",
@@ -12,10 +11,15 @@ defmodule Wardrik.Channel.Installation do
         approvers: ["@maria"]
       }
 
-  `owner` is whose agents answer there: an org, as `acme`, or a person, as `acme/@jon`. `name` is
-  what the chat app calls the workspace, where it said. `approvers` names who may decide what those
-  agents wait on, as the channel names people, or is `:anyone`. With none named, whoever asked for
-  a turn decides it.
+  ## Fields
+
+    * `:channel` - the channel's name, as `"slack"`.
+    * `:workspace` - the workspace's ID in the chat app.
+    * `:owner` - whose agents answer there: an org, as `"acme"`, or a person, as `"acme/@jon"`.
+    * `:token` - the chat app's token for the workspace. Hidden from `inspect/2`.
+    * `:name` - the workspace's name in the chat app, if it gave one.
+    * `:approvers` - who may decide the calls those agents wait on, named as the chat app names
+      people, or `:anyone`. With `[]`, the person who started the turn decides.
   """
 
   @derive {Inspect, except: [:token]}
@@ -31,7 +35,7 @@ defmodule Wardrik.Channel.Installation do
           approvers: [String.t()] | :anyone
         }
 
-  @doc "Returns the pattern of the owner's agents' resources, as `acme/agent/*`."
+  @doc "Returns the resource pattern for the owner's agents, as `acme/agent/*`."
   @spec agents(t()) :: String.t()
   def agents(%__MODULE__{owner: owner}), do: owner <> "/agent/*"
 end

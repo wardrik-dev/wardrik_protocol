@@ -1,7 +1,9 @@
 defmodule Wardrik.Interrupt do
   @moduledoc """
-  A call an agent waits on a person for, by its `id`, and why: `:tool_approval`, `:model_approval`,
-  `:ceiling_approval`, `:authorization` or `:in_doubt`. `agent_id` names the agent, where a list of many gives it.
+  A call an agent waits on a person for.
+
+  `reason` is `:tool_approval`, `:model_approval`, `:ceiling_approval`, `:authorization` or
+  `:in_doubt`. `agent_id` is set only by `Wardrik.Interrupts.list/2`.
   """
 
   use Wardrik.Type,
@@ -18,7 +20,7 @@ defmodule Wardrik.Interrupt do
       agent_id: nil
     ]
 
-  @doc "Reads one from an item of `interrupts.list`, with the agent it's of."
+  @doc "Builds one from an `interrupts.list` item, with its `agent_id`."
   @spec from_listed(map()) :: t()
   def from_listed(%{"agent" => %{"id" => agent_id}, "interrupt" => interrupt}),
     do: %{from_json(interrupt) | agent_id: agent_id}

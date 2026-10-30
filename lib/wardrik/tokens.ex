@@ -1,11 +1,13 @@
 defmodule Wardrik.Tokens do
   @moduledoc """
-  The deployment's API tokens, which people and programs reach Wardrik over HTTP with.
+  Operations on the deployment's API tokens. People and programs use them to reach Wardrik over
+  HTTP.
 
-      {:ok, issued} = Wardrik.Tokens.create(scope, name: "ci", roles: ["reader"], resources: ["acme/agent/*"])
+      Wardrik.Tokens.create(scope, name: "ci", roles: ["reader"], resources: ["acme/agent/*"])
       #=> {:ok, %Wardrik.TokenIssued{token: %Wardrik.Token{id: "3f9a61c0d4e2", ...}, secret: "wrk_3f9a61c0d4e2_9c1e..."}}
 
-      {:ok, ci} = MyApp.Wardrik.authenticate(issued.secret)
+      # The secret is returned once. Turn it back into a scope with:
+      {:ok, ci} = MyApp.Wardrik.authenticate("wrk_3f9a61c0d4e2_9c1e...")
   """
 
   use Wardrik.Operations.Functions, prefix: "tokens"

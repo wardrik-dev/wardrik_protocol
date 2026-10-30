@@ -1,27 +1,28 @@
 defmodule Wardrik.Channel.Installations do
   @moduledoc """
-  Installations keep the workspaces a channel is added to, each with its token. A token is a
-  secret, so keep it as you keep your others.
+  A behaviour for storing the workspaces a channel is added to, each with its token.
 
-  A channel takes them as `installations: {module, config}`, so a host keeps its workspaces where it
-  keeps its own records. Given a `token:` instead, it's added to the one workspace that token
-  reaches.
+  Pass an implementation to a channel as `installations: {module, config}`. The host then keeps
+  workspaces with its own records. A channel given `token:` instead serves only the workspace that
+  token reaches.
+
+  Tokens are secrets. Store them as you store your others.
   """
 
   alias Wardrik.Channel.Installation
 
-  @doc "Finds the channel's installation in `workspace`, as the chat app names it."
+  @doc "Fetches the channel's installation in `workspace`, as the chat app names it."
   @callback fetch(config :: term(), channel :: String.t(), workspace :: String.t()) ::
               {:ok, Installation.t()} | :error
 
-  @doc "Returns the channel's installations whose owner is `owner`, as `acme` or `acme/@jon`."
+  @doc "Returns the channel's installations owned by `owner`, as `acme` or `acme/@jon`."
   @callback owned(config :: term(), channel :: String.t(), owner :: String.t()) :: [
               Installation.t()
             ]
 
-  @doc "Keeps `installation`, in place of any of the same channel and workspace."
+  @doc "Stores `installation`, replacing any with the same channel and workspace."
   @callback put(config :: term(), Installation.t()) :: :ok | {:error, String.t()}
 
-  @doc "Forgets the channel's installation in `workspace`. Forgetting none is `:ok`."
+  @doc "Deletes the channel's installation in `workspace`. Returns `:ok` if there is none."
   @callback delete(config :: term(), channel :: String.t(), workspace :: String.t()) :: :ok
 end

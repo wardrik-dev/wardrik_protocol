@@ -1,5 +1,5 @@
 defmodule Wardrik.ChannelResponse do
-  @moduledoc "What a channel answers its chat app: the `status`, `headers` and `body` to send as they are."
+  @moduledoc "A channel's response to its chat app: the `status`, `headers` and `body` to send unchanged."
 
   use Wardrik.Type,
     schema: ["channel_response"],

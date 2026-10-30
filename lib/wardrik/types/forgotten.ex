@@ -1,7 +1,7 @@
 defmodule Wardrik.Forgotten do
   @moduledoc """
-  What forgetting many agents did: the IDs `forgotten`, and those `kept` and `failed`, each as
-  `{id, why}`.
+  The result of forgetting many agents. `forgotten` lists the IDs forgotten. `kept` and `failed`
+  list `{id, why}` pairs.
   """
 
   use Wardrik.Type,

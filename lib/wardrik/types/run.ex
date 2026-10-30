@@ -1,5 +1,5 @@
 defmodule Wardrik.Run do
-  @moduledoc "One run of an agent: what it answered, how it ended, and what it used and cost."
+  @moduledoc "One run of an agent: how it ended, how long it took, and what it used and cost."
 
   use Wardrik.Type,
     schema: ["runs", "properties", "runs", "items"],

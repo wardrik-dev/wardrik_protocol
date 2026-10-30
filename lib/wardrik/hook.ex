@@ -1,6 +1,6 @@
 defmodule Wardrik.Hook do
   @moduledoc """
-  Delivers what services send to agents' webhook triggers, as the HTTP surface receives it.
+  Delivers a service's request to an agent's webhook trigger.
 
       :ok = Wardrik.Hook.deliver(scope, "acme/triage", "issues", body: body, headers: headers)
   """

@@ -1,5 +1,5 @@
 defmodule Wardrik.Decision do
-  @moduledoc "A call decided, by its `id`: `:approved` or `:rejected`."
+  @moduledoc "A decided call: its `id`, and its `decision`, `:approved` or `:rejected`."
 
   use Wardrik.Type,
     schema: ["decided", "properties", "decisions", "items"],

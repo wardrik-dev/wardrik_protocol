@@ -1,7 +1,8 @@
 defmodule Wardrik.Operations.Types do
   @moduledoc """
-  What each operation takes and answers in Elixir: its input from keyword lists and structs, and
-  its output as structs, lists and `:ok`, in place of the protocol's JSON.
+  Converts each operation's input and output between Elixir and the protocol's JSON.
+
+  Input is keyword lists and structs. Output is structs, lists and `:ok`.
   """
 
   alias Wardrik.Agent
@@ -64,7 +65,7 @@ defmodule Wardrik.Operations.Types do
 
   @listed Map.keys(@lists)
 
-  @doc "Returns what a path names: the text given, or the id or name of the struct given."
+  @doc "Returns the path segment for `value`: a string as given, or a struct's ID or name."
   @spec path(String.t() | struct()) :: String.t()
   def path(text) when is_binary(text), do: text
   def path(%Agent{id: id}), do: id
@@ -75,7 +76,7 @@ defmodule Wardrik.Operations.Types do
   def path(%Connection{provider: provider}), do: provider
   def path(%Token{id: id}), do: id
 
-  @doc "Turns `input`, as an Elixir caller gives it, into the operation's JSON input."
+  @doc "Converts an Elixir caller's `input` to the operation's JSON input."
   @spec encode(String.t(), term()) :: map()
   def encode("agent.define", %Definition{} = definition), do: Definition.to_json(definition)
   def encode("agent.define", fields), do: fields |> Definition.new!() |> Definition.to_json()
@@ -87,7 +88,7 @@ defmodule Wardrik.Operations.Types do
   def encode(_id, []), do: %{}
   def encode(_id, input), do: Type.json(input)
 
-  @doc "Turns the operation's JSON output into what an Elixir caller gets."
+  @doc "Converts the operation's JSON output to what an Elixir caller gets."
   @spec decode(String.t(), map() | nil) :: term()
   def decode(id, output) when id in @snapshots, do: {:ok, Agent.from_json(output)}
 
@@ -118,7 +119,7 @@ defmodule Wardrik.Operations.Types do
   def decode("events.head", %{"cursor" => cursor}), do: {:ok, cursor}
   def decode("deployment.reload", %{"reloaded" => nodes}), do: {:ok, nodes}
 
-  @doc "Turns a streamed event and its cursor into what an Elixir caller gets."
+  @doc "Converts a streamed event and its cursor to `{%Wardrik.Event{}, cursor}`."
   @spec event({map(), String.t()}) :: {Event.t(), String.t()}
   def event({event, cursor}), do: {Event.from_json(event), cursor}
 

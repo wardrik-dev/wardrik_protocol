@@ -1,9 +1,9 @@
 defmodule WardrikProtocol do
   @moduledoc """
-  What Wardrik sends and takes: its events, as CloudEvents, and its operations, as OpenAPI.
+  Wardrik's wire format: events as CloudEvents, and operations as OpenAPI.
 
-      root = JSV.build!(WardrikProtocol.schema("run.started"))
-      {:ok, _data} = JSV.validate(event["data"], root)
+      schema = JSV.build!(WardrikProtocol.schema("run.started"))
+      {:ok, _data} = JSV.validate(event["data"], schema)
 
       %{method: "post", path: "/v1/agents/{agent}/messages"} = WardrikProtocol.operation("agent.ask")
   """
@@ -19,12 +19,21 @@ defmodule WardrikProtocol do
   @operations Operations.build(@document)
 
   @typedoc """
-  An operation: its `id`, the `operationId`, where it's served over HTTP, the `action` a caller must
-  be allowed, its `effect` (`read`, `change` or `destructive`), its `subject` (`agent`, `agents`,
-  `deployment`, `owner` for an org's or a person's accounts and servers, `hook` for a request
-  that proves itself with a secret in place of a caller, or `channel` for a chat app's request,
-  which its channel checks), one `input` schema of its parameters and body together, and its
-  `output` schema.
+  An operation from `openapi.json`.
+
+    * `:id` - its `operationId`, as `"agent.ask"`.
+    * `:summary` and `:description` - what it does.
+    * `:method` and `:path` - its HTTP route.
+    * `:action` - what the caller must be allowed to do.
+    * `:effect` - `"read"`, `"change"` or `"destructive"`.
+    * `:subject` - what it acts on: `"agent"`, `"agents"`, `"deployment"`, `"owner"` (an org's or
+      person's accounts and servers), `"hook"` (a request that proves itself with a secret, not a
+      caller) or `"channel"` (a chat app's request, which its channel verifies).
+    * `:parameters` - which input fields go in the HTTP path or query.
+    * `:input` - one schema for its parameters and body together.
+    * `:status` - the HTTP status it returns on success.
+    * `:output` - its output schema, or `nil`.
+    * `:stream` - `true` if it can stream events.
   """
   @type operation() :: %{
           id: String.t(),
@@ -44,38 +53,49 @@ defmodule WardrikProtocol do
 
   for file <- @files, do: @external_resource(file)
 
-  @doc "Returns where the schemas are as files."
+  @doc "Returns the directory of the schema files."
   @spec dir() :: Path.t()
   def dir, do: @dir
 
-  @doc "Lists every event's type, like `wardrik.run.started`."
+  @doc "Lists every event type, like `wardrik.run.started`."
   @spec types() :: [String.t()]
   def types, do: Enum.map(@events, &("wardrik." <> &1))
 
-  @doc "Returns the `dataschema` of an event's type."
+  @doc """
+  Returns the `dataschema` for an event type.
+
+      WardrikProtocol.dataschema("wardrik.run.started")
+      #=> "urn:wardrik:schema:v1:run.started"
+
+  Raises `FunctionClauseError` for an unknown type.
+  """
   @spec dataschema(String.t()) :: String.t()
   def dataschema("wardrik." <> name) when name in @events, do: "urn:wardrik:schema:v1:" <> name
 
-  @doc "Returns whether events of the type are sent as they happen and never kept."
+  @doc "Returns `true` if events of the type are sent as they happen and never stored."
   @spec live?(String.t()) :: boolean()
   def live?("wardrik." <> name) when name in @events,
     do: Map.get(schema(name), "x-wardrik-live", false)
 
-  @doc "Returns the schema `name` whole, like `run.started`, `cloudevent` or `defs`."
+  @doc """
+  Returns the schema `name` with every `$ref` inlined.
+
+  `name` is a file name in `dir/0` without `.json`, like `run.started`, `cloudevent` or `defs`.
+  """
   @spec schema(String.t()) :: map()
   for name <- @names do
     def schema(unquote(name)), do: unquote(Macro.escape(Inline.schema(@dir, name)))
   end
 
-  @doc "Returns the OpenAPI document of every operation, with each schema put in its place."
+  @doc "Returns the OpenAPI document, with every `$ref` to another schema file inlined."
   @spec openapi() :: map()
   def openapi, do: @document
 
-  @doc "Lists every operation, in the order of its path."
+  @doc "Lists every operation, ordered by path."
   @spec operations() :: [operation()]
   def operations, do: @operations
 
-  @doc "Returns the operation `id` names, like `agent.ask`, or `nil`."
+  @doc "Returns the operation with ID `id`, like `agent.ask`, or `nil`."
   @spec operation(String.t()) :: operation() | nil
   for %{id: id} = operation <- @operations do
     def operation(unquote(id)), do: unquote(Macro.escape(operation))

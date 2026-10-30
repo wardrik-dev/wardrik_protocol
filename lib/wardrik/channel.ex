@@ -1,40 +1,47 @@
 defmodule Wardrik.Channel do
   @moduledoc """
-  A chat app people reach agents through, such as Slack, as a Wardrik takes it in `:channels`, by
-  a name of your own:
+  A behaviour for chat apps, like Slack, that people reach agents through.
+
+  Give each channel a name of your own in Wardrik's `:channels` option:
 
       channels: [slack: {WardrikSlack, token: token, signing_secret: secret}]
 
-  Each channel runs as a child of the Wardrik, and is handed what its chat app sends to
-  `POST /v1/channels/{channel}/{path}` as it came, to check by what it carries, such as a
-  signature over the body. Both callbacks take the channel's options with `:wardrik`, the instance,
-  `:channel`, its name, and `:store`, the Wardrik's store, to scope by the package's name.
+  Each channel runs under Wardrik's supervisor. Requests to `POST /v1/channels/{channel}/{path}`
+  reach `c:request/2` unchanged, so the channel can verify them, for example by a signature over
+  the body. To deliver one yourself:
 
       {:ok, answer} = Wardrik.Channel.deliver(scope, "slack", "events", body: body, headers: headers)
+
+  Every callback gets the channel's options, plus:
+
+    * `:wardrik` - the instance the channel runs under.
+    * `:channel` - the channel's name.
+    * `:store` - Wardrik's store. Prefix keys with your package's name.
   """
 
   use Wardrik.Operations.Functions, prefix: "channel"
 
-  @typedoc "What the chat app sent: where in the channel, its raw body, and its headers by lowercase name."
+  @typedoc "A request from the chat app: its `path` within the channel, raw `body`, and `headers` by lowercase name."
   @type request() :: %{path: String.t(), body: String.t(), headers: %{String.t() => String.t()}}
 
-  @typedoc "What the chat app is answered."
+  @typedoc "The response sent back to the chat app."
   @type response() :: %{
           status: pos_integer(),
           headers: %{String.t() => String.t()},
           body: String.t()
         }
 
-  @doc "Returns what the channel runs."
+  @doc "Returns the child spec the channel runs as."
   @callback child_spec(opts :: keyword()) :: Supervisor.child_spec()
 
-  @doc "Answers what the chat app sent the channel."
+  @doc "Handles a request from the chat app and returns the response."
   @callback request(opts :: keyword(), request()) :: response()
 
   @doc """
-  Posts `notice` in `room`, asking `approvers` by name, as the channel names people, about the calls
-  a parked turn waits on. Returns `{:skip, why}` where there's nowhere to post it. A channel that
-  doesn't define it posts no notices; see `Wardrik.Notify`.
+  Posts `notice` in `room`, asking `approvers` to decide the calls a parked turn waits on.
+
+  `approvers` are named as the chat app names people. Returns `{:skip, reason}` if there's nowhere
+  to post. Optional: a channel without it posts no notices. See `Wardrik.Notify`.
   """
   @callback notify(
               opts :: keyword(),

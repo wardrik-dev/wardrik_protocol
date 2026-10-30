@@ -1,5 +1,5 @@
 defmodule Wardrik.Runs do
-  @moduledoc "An agent's runs, newest first, and the totals across them."
+  @moduledoc "An agent's `runs`, newest first, and their `totals`."
 
   use Wardrik.Type,
     schema: ["runs"],
@@ -11,7 +11,7 @@ defmodule Wardrik.Runs do
 end
 
 defmodule Wardrik.Runs.Totals do
-  @moduledoc "What an agent's runs came to, together."
+  @moduledoc "Totals across an agent's runs."
 
   use Wardrik.Type,
     schema: ["runs", "properties", "totals"],

@@ -1,5 +1,5 @@
 defmodule Wardrik.Nodes do
-  @moduledoc "The deployment's nodes, each with how many agents run on it, and how many agents sleep."
+  @moduledoc "The deployment's `nodes`, and how many agents are `asleep`."
 
   use Wardrik.Type,
     schema: ["nodes"],
@@ -7,7 +7,7 @@ defmodule Wardrik.Nodes do
 end
 
 defmodule Wardrik.Node do
-  @moduledoc "One of the deployment's nodes, by its `name`, and how many `agents` run on it."
+  @moduledoc "One of the deployment's nodes: its `name`, and how many `agents` run on it."
 
   use Wardrik.Type,
     schema: ["nodes", "properties", "nodes", "items"],

@@ -1,9 +1,19 @@
 defmodule Wardrik.AgentID do
   @moduledoc """
-  Reads agent IDs: `acme/triage`, `acme/@jon/triage`, and a conversation of either, as
-  `acme/triage/C1-1696.1234`, which runs on its agent's definition with a history of its own. No
-  segment holds `:`, which names a person known elsewhere, as `slack:T0123/U024BE7LH`, nor `*` or
-  `?`, which patterns take.
+  Parses agent IDs.
+
+      Wardrik.AgentID.parse("acme/@jon/triage/C1-1696.1234")
+      #=> {:ok, %Wardrik.AgentID{owner: "acme/@jon", name: "triage", conversation: "C1-1696.1234"}}
+
+  An ID is one of:
+
+    * `acme/triage` - an org's agent.
+    * `acme/@jon/triage` - a person's agent.
+    * `acme/triage/C1-1696.1234` or `acme/@jon/triage/C1-1696.1234` - a conversation. It runs on
+      its agent's definition, with its own history.
+
+  No segment may be empty or contain `:`, `*` or `?`. `:` marks people known elsewhere, as
+  `slack:T0123/U024BE7LH`. `*` and `?` are for patterns.
   """
 
   @enforce_keys [:owner, :name, :conversation]
@@ -11,7 +21,7 @@ defmodule Wardrik.AgentID do
 
   @type t() :: %__MODULE__{owner: String.t(), name: String.t(), conversation: String.t() | nil}
 
-  @doc "Reads the ID `id`, or returns `:error` when it isn't an agent's or a conversation's."
+  @doc "Parses `id`. Returns `:error` if it isn't an agent or conversation ID."
   @spec parse(String.t()) :: {:ok, t()} | :error
   def parse(id) do
     case String.split(id, "/") do
@@ -23,7 +33,14 @@ defmodule Wardrik.AgentID do
     end
   end
 
-  @doc "Returns the ID of the agent whose definition `id` runs on: itself, or a conversation's agent."
+  @doc """
+  Returns the ID of the agent whose definition `id` runs on.
+
+      Wardrik.AgentID.agent("acme/triage/C1-1696.1234")
+      #=> "acme/triage"
+
+  Returns `id` unchanged if it's an agent ID or doesn't parse.
+  """
   @spec agent(String.t()) :: String.t()
   def agent(id) do
     case parse(id) do
@@ -32,7 +49,7 @@ defmodule Wardrik.AgentID do
     end
   end
 
-  @doc "Returns whether `id` is one of an agent's conversations."
+  @doc "Returns `true` if `id` is a conversation ID."
   @spec conversation?(String.t()) :: boolean()
   def conversation?(id), do: match?({:ok, %__MODULE__{conversation: c}} when c != nil, parse(id))
 

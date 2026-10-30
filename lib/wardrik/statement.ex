@@ -1,10 +1,13 @@
 defmodule Wardrik.Statement do
   @moduledoc """
-  A statement allows some actions on the resources its patterns cover, as IAM's do. In a pattern,
-  `*` stands for any run of characters, `/` too, and `?` for one.
+  Allows actions on the resources its patterns match, like an IAM statement.
 
       Wardrik.Statement.new(roles: [:reader, :messenger], resources: ["acme/agent/*"])
       Wardrik.Statement.new(actions: ["agent.*"], resources: ["acme/@jon/*"])
+
+  In a pattern, `*` matches any run of characters, including `/`. `?` matches one character.
+
+  ## Roles
 
   A role is a named set of actions:
 
@@ -39,22 +42,34 @@ defmodule Wardrik.Statement do
     owner: ["*"]
   }
 
-  @doc "Returns the role a name writes, as `\"reader\"` for `:reader`, or `:error`."
+  @doc "Returns `{:ok, role}` for a role's name, as `:reader` for `\"reader\"`, or `:error`."
   @spec role(String.t()) :: {:ok, atom()} | :error
   def role(name),
     do: Map.fetch(Map.new(@roles, fn {role, _actions} -> {Atom.to_string(role), role} end), name)
 
-  @doc "Reads a statement from the protocol's JSON."
+  @doc "Builds a statement from the protocol's JSON."
   @spec from_json(map()) :: t()
   def from_json(%{"actions" => actions, "resources" => resources}),
     do: %__MODULE__{actions: actions, resources: resources}
 
-  @doc "Writes the statement as the protocol's JSON."
+  @doc "Returns the statement as the protocol's JSON."
   @spec to_json(t()) :: map()
   def to_json(%__MODULE__{actions: actions, resources: resources}),
     do: %{"actions" => actions, "resources" => resources}
 
-  @doc "Builds a statement from `:actions` and `:roles`, on `:resources`."
+  @doc """
+  Builds a statement.
+
+      Wardrik.Statement.new(roles: [:reader], actions: ["agent.ask"], resources: ["acme/agent/*"])
+
+  ## Options
+
+    * `:resources` - patterns of the resources it covers.
+    * `:actions` - actions it allows. `[]` unless set.
+    * `:roles` - roles whose actions it allows too. `[]` unless set.
+
+  Raises `ArgumentError` for an unknown option, and `KeyError` for an unknown role.
+  """
   @spec new(keyword()) :: t()
   def new(opts) do
     opts = Keyword.validate!(opts, [:resources, actions: [], roles: []])
