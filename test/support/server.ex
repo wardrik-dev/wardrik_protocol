@@ -28,7 +28,7 @@ defmodule Wardrik.Test.Server do
   end
 
   @impl Wardrik.Server
-  def follow(_scope, "acme/broken", _input, _opts), do: [{:text, "Half"}, {:failed, :boom}]
+  def follow(_scope, "acme/broken", _input, _opts), do: [{:text, "Half"}, {:failed, "It broke."}]
 
   def follow(_scope, "acme/waiting", _input, _opts),
     do: [{:waiting, [%Wardrik.Interrupt{id: "c1", reason: :tool_approval}]}]
@@ -39,6 +39,15 @@ defmodule Wardrik.Test.Server do
       {:text, input},
       {:done, %Wardrik.Reply{message: "m1", run: "r1", text: "Re: " <> input}}
     ]
+
+  @impl Wardrik.Server
+  def authenticate(_wardrik, _secret), do: {:error, Wardrik.Error.new(:unauthorized, "No.")}
+
+  @impl Wardrik.Server
+  def offer(_scope, _tools), do: :ok
+
+  @impl Wardrik.Server
+  def answer(_call, _message), do: :ok
 
   @token %{
     "id" => "3f9a61c0d4e2",
