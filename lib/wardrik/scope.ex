@@ -2,7 +2,7 @@ defmodule Wardrik.Scope do
   @moduledoc """
   Who is acting through Wardrik, and what they may do.
 
-      scope = MyApp.Wardrik.as("acme/@maria", roles: [:owner], resources: ["acme/@maria/*"])
+      scope = MyApp.AgentRuntime.as("acme/@maria", roles: [:owner], resources: ["acme/@maria/*"])
 
   `Wardrik.as/3` makes a scope. `Wardrik.grant/2` adds to it.
 
