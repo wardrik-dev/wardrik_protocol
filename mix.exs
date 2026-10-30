@@ -9,7 +9,7 @@ defmodule WardrikProtocol.MixProject do
       description:
         "What Wardrik sends and takes: its events, as CloudEvents, and its operations, as OpenAPI.",
       package: package(),
-      docs: [main: "readme", extras: ["README.md"]],
+      docs: [main: "readme", extras: ["README.md", "CHANGELOG.md"]],
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       aliases: aliases(),
@@ -38,7 +38,7 @@ defmodule WardrikProtocol.MixProject do
     [
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => "https://github.com/wardrik-dev/wardrik_protocol"},
-      files: ~w(lib priv/v1 mix.exs README.md LICENSE)
+      files: ~w(lib priv/v1 mix.exs README.md CHANGELOG.md LICENSE)
     ]
   end
 
