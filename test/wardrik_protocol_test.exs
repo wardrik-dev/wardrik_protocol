@@ -26,7 +26,7 @@ defmodule WardrikProtocolTest do
     do: match?({:ok, _value}, JSV.validate(value, JSV.build!(WardrikProtocol.schema(name))))
 
   test "lists every event's type" do
-    assert Enum.count(WardrikProtocol.types()) == 53
+    assert Enum.count(WardrikProtocol.types()) == 55
     assert "wardrik.run.started" in WardrikProtocol.types()
 
     assert WardrikProtocol.dataschema("wardrik.run.started") ==
@@ -90,6 +90,26 @@ defmodule WardrikProtocolTest do
              Wardrik.MCPServer.from_json(command)
   end
 
+  test "takes a webhook for an owner's notices, its secret only ever named" do
+    ops = %{"name" => "ops", "url" => "https://hooks.acme.example/wardrik"}
+
+    assert valid?("notify_target_input", Map.put(ops, "secret", %{"name" => "HOOK_SECRET"}))
+    refute valid?("notify_target_input", Map.put(ops, "secret", "shh"))
+    refute valid?("notify_target_input", Map.put(ops, "name", "slack:#ops"))
+    refute valid?("notify_target_input", Map.put(ops, "module", "Wardrik.Notify.Room"))
+    refute valid?("notify_target_input", Map.put(ops, "req_options", %{}))
+    refute valid?("notify_target_input", Map.delete(ops, "url"))
+
+    room = %{"owner" => "deployment", "name" => "pager", "source" => "config", "kind" => "room"}
+    assert valid?("notify_target", room)
+    refute valid?("notify_target", Map.put(room, "room", "#ops"))
+
+    assert %Wardrik.NotifyTarget{owner: "acme", source: :runtime, secret: "OPS_HOOK_SECRET"} =
+             Wardrik.NotifyTarget.from_json(
+               hd(WardrikProtocol.schema("notify_target")["examples"])
+             )
+  end
+
   test "checks an event and its data" do
     assert valid?("cloudevent", @event)
     assert valid?("tool_call.started", @event["data"])
@@ -142,6 +162,7 @@ defmodule WardrikProtocolTest do
                deployment.nodes deployment.reload events.head events.list hook.deliver
                hook.deliver_with_secret interrupts.list
                mcp_servers.add mcp_servers.list mcp_servers.remove
+               notify_targets.add notify_targets.list notify_targets.remove
                providers.add providers.list providers.remove secrets.delete secrets.list
                secrets.put tokens.create tokens.list
                tokens.revoke

@@ -20,6 +20,7 @@ defmodule Wardrik.Operations.Types do
   alias Wardrik.MCPServerAdded
   alias Wardrik.Message
   alias Wardrik.Nodes
+  alias Wardrik.NotifyTarget
   alias Wardrik.Page
   alias Wardrik.Provider
   alias Wardrik.Runs
@@ -52,7 +53,9 @@ defmodule Wardrik.Operations.Types do
     "mcp_servers.add" => MCPServerAdded,
     "mcp_servers.remove" => MCPServer,
     "providers.add" => Provider,
-    "providers.remove" => Provider
+    "providers.remove" => Provider,
+    "notify_targets.add" => NotifyTarget,
+    "notify_targets.remove" => NotifyTarget
   }
 
   @lists %{
@@ -63,6 +66,7 @@ defmodule Wardrik.Operations.Types do
     "connections.list" => {"connections", Connection, :from_json},
     "mcp_servers.list" => {"servers", MCPServer, :from_json},
     "providers.list" => {"providers", Provider, :from_json},
+    "notify_targets.list" => {"targets", NotifyTarget, :from_json},
     "secrets.list" => {"secrets", Secret, :from_json},
     "ceilings.list" => {"ceilings", Spend, :from_json}
   }
@@ -78,6 +82,7 @@ defmodule Wardrik.Operations.Types do
   def path(%Trigger{name: name}), do: name
   def path(%MCPServer{name: name}), do: name
   def path(%Provider{name: name}), do: name
+  def path(%NotifyTarget{name: name}), do: name
   def path(%Connection{provider: provider}), do: provider
   def path(%Token{id: id}), do: id
 

@@ -20,6 +20,12 @@
 - `server` and `servers` say each server's `owner` and `source`, and `mcp_servers.list` answers
   those the owner gets from further out, as `providers.list` does. `url` is left out for a
   command the deployment starts. `Wardrik.MCPServer` has `owner` and `source`.
+- `notify_targets.list`, `notify_targets.add` and `notify_targets.remove`, and
+  `Wardrik.NotifyTargets`: webhooks an org or person adds for their agents' notices, listed with
+  those it gets from further out. A target's secret is only ever named.
+- `notify_target_input`, `notify_target`, `notify_targets` and `Wardrik.NotifyTarget`.
+- `wardrik.notify_target.added` and `wardrik.notify_target.removed`.
+- `notify_target.read` for `:reader`, and `notify_target.add` for `:definer`.
 
 ## 0.1.0-rc.1 (2026-10-30)
 

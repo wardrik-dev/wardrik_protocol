@@ -13,10 +13,10 @@ defmodule Wardrik.Statement do
 
   | Role | Actions |
   | --- | --- |
-  | `:reader` | `agent.read`, `agent.events`, `connection.read`, `mcp_server.read`, `provider.read`, `ceiling.read` |
+  | `:reader` | `agent.read`, `agent.events`, `connection.read`, `mcp_server.read`, `provider.read`, `notify_target.read`, `ceiling.read` |
   | `:messenger` | `agent.ask`, `agent.cancel`, `agent.clear` |
   | `:approver` | `agent.decide` |
-  | `:definer` | `agent.define`, `agent.spawn`, `agent.stop`, `agent.forget`, `connection.connect`, `mcp_server.add`, `provider.add` |
+  | `:definer` | `agent.define`, `agent.spawn`, `agent.stop`, `agent.forget`, `connection.connect`, `mcp_server.add`, `provider.add`, `notify_target.add` |
   | `:worker` | `agent.serve`, offering tools to the agents it covers |
   | `:owner` | every action |
   """
@@ -33,6 +33,7 @@ defmodule Wardrik.Statement do
       "connection.read",
       "mcp_server.read",
       "provider.read",
+      "notify_target.read",
       "ceiling.read"
     ],
     messenger: ["agent.ask", "agent.cancel", "agent.clear"],
@@ -44,7 +45,8 @@ defmodule Wardrik.Statement do
       "agent.forget",
       "connection.connect",
       "mcp_server.add",
-      "provider.add"
+      "provider.add",
+      "notify_target.add"
     ],
     worker: ["agent.serve"],
     owner: ["*"]
