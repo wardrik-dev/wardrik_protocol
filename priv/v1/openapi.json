@@ -1432,7 +1432,8 @@
     "/v1/servers": {
       "get": {
         "operationId": "mcp_servers.list",
-        "summary": "List the MCP servers an owner added",
+        "summary": "List the MCP servers an owner's agents reach",
+        "description": "The owner's own, then those it gets from further out: a person's org's, then the deployment's, including those it started with. Each says which owner holds it. The nearest of a name wins, as the agents see it.",
         "tags": [
           "Servers"
         ],
@@ -1527,7 +1528,7 @@
       "delete": {
         "operationId": "mcp_servers.remove",
         "summary": "Remove an MCP server",
-        "description": "Its tools leave its agents from their next turn, and the sign-ins to it are forgotten.",
+        "description": "One of the owner's own, added at runtime. Its tools leave its agents from their next turn, and the sign-ins to it are forgotten.",
         "tags": [
           "Servers"
         ],
