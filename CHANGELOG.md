@@ -10,6 +10,10 @@
 - `Wardrik.Provider`.
 - `Wardrik.Owners`, moved from `wardrik`: parses an owner, and the chain its settings resolve
   along, for every package that keeps settings by owner.
+- `providers.list`, `providers.add` and `providers.remove`, and `Wardrik.Providers`: an owner's
+  OAuth apps, listed with those it gets from further out.
+- `Wardrik.AgentID.parse/1` reads an agent's owner with `Wardrik.Owners.parse/1`, so an ID like
+  `ac@me/triage` or `acme/@jon` is `:error`.
 
 ## 0.1.0-rc.1 (2026-10-30)
 

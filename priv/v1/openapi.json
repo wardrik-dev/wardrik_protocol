@@ -1568,6 +1568,146 @@
         }
       }
     },
+    "/v1/providers": {
+      "get": {
+        "operationId": "providers.list",
+        "summary": "List the OAuth apps an owner's people sign in with",
+        "description": "The owner's own, then those it gets from further out: a person's org's, then the deployment's. Each says which owner holds it.",
+        "tags": [
+          "Providers"
+        ],
+        "x-wardrik-action": "provider.read",
+        "x-wardrik-effect": "read",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The OAuth apps.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:providers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "operationId": "providers.add",
+        "summary": "Add an OAuth app for an owner's people",
+        "description": "An org's app serves its own agents and every agent of its people; a person's serves their agents alone. One of the owner's own by the same name is a conflict; one held further out is overridden.",
+        "tags": [
+          "Providers"
+        ],
+        "x-wardrik-action": "provider.add",
+        "x-wardrik-effect": "change",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "urn:wardrik:schema:v1:provider_input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The OAuth app, as it's kept.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:provider"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/providers/{provider}": {
+      "delete": {
+        "operationId": "providers.remove",
+        "summary": "Remove an OAuth app",
+        "description": "Only the owner's own. Sign-ins through it find the next one out by the same name, if there's one.",
+        "tags": [
+          "Providers"
+        ],
+        "x-wardrik-action": "provider.add",
+        "x-wardrik-effect": "destructive",
+        "x-wardrik-subject": "owner",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/provider"
+          },
+          {
+            "$ref": "#/components/parameters/owner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The OAuth app, as it was.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "urn:wardrik:schema:v1:provider"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/v1/tokens": {
       "get": {
         "operationId": "tokens.list",

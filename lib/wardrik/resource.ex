@@ -7,6 +7,7 @@ defmodule Wardrik.Resource do
   | `acme/agent/triage` | the agent `acme/triage` |
   | `acme/@jon/agent/triage` | the agent `acme/@jon/triage` |
   | `acme/mcp_server/linear` | the org's MCP server `linear` |
+  | `acme/provider/google` | the org's OAuth app `google` |
   | `acme/@jon/connection/github` | Jon's GitHub account |
   | `deployment` | the deployment |
   """
