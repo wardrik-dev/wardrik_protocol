@@ -61,6 +61,8 @@ defmodule Wardrik.NamesTest do
   test "builds a statement from roles, and reads and writes it as JSON" do
     statement = Statement.new(roles: [:reader], resources: ["acme/agent/*"])
     assert "agent.read" in statement.actions
+    assert "notify_target.read" in statement.actions
+    assert "notify_target.add" in Statement.new(roles: [:definer], resources: ["*"]).actions
     assert Statement.from_json(Statement.to_json(statement)) == statement
     assert Statement.role("owner") == {:ok, :owner}
     assert Statement.role("root") == :error
@@ -125,6 +127,7 @@ defmodule Wardrik.NamesTest do
           {%Wardrik.Trigger{name: "weekly"}, "weekly"},
           {%Wardrik.MCPServer{name: "linear"}, "linear"},
           {%Wardrik.Provider{name: "google"}, "google"},
+          {%Wardrik.NotifyTarget{name: "ops"}, "ops"},
           {%Wardrik.Connection{provider: "github"}, "github"},
           {%Wardrik.Token{id: "3f9a"}, "3f9a"}
         ] do
