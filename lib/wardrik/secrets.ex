@@ -9,7 +9,8 @@ defmodule Wardrik.Secrets do
       #=> {:ok, [%Wardrik.Secret{name: "GITHUB_TOKEN", kind: :secret}]}
 
   The owner `"deployment"` holds the deployment's own secrets. `${NAME}` in a daemon's config reads
-  them. No agent can.
+  them. No agent can, except for API keys where Wardrik starts with `deployment_keys: true`: then
+  an agent whose owner holds no key of a name uses the deployment's. See `Wardrik.Keys`.
   """
 
   use Wardrik.Operations.Functions, prefix: "secrets"
