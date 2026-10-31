@@ -12,9 +12,12 @@ defmodule Wardrik.AgentID do
     * `acme/triage/C1-1696.1234` or `acme/@jon/triage/C1-1696.1234` - a conversation. It runs on
       its agent's definition, with its own history.
 
-  No segment may be empty or contain `:`, `*` or `?`. `:` marks people known elsewhere, as
-  `slack:T0123/U024BE7LH`. `*` and `?` are for patterns.
+  The owner reads as `Wardrik.Owners.parse/1` reads it, and only an owner holds a `/@` segment.
+  The name and conversation may not be empty or contain `:`, `*` or `?`. `:` marks people known
+  elsewhere, as `slack:T0123/U024BE7LH`. `*` and `?` are for patterns.
   """
+
+  alias Wardrik.Owners
 
   @enforce_keys [:owner, :name, :conversation]
   defstruct @enforce_keys
@@ -24,13 +27,9 @@ defmodule Wardrik.AgentID do
   @doc "Parses `id`. Returns `:error` if it isn't an agent or conversation ID."
   @spec parse(String.t()) :: {:ok, t()} | :error
   def parse(id) do
-    case String.split(id, "/") do
-      [org, "@" <> _user = user, name] -> new([org, user], name, nil)
-      [org, "@" <> _user = user, name, conversation] -> new([org, user], name, conversation)
-      [org, name] -> new([org], name, nil)
-      [org, name, conversation] -> new([org], name, conversation)
-      _other -> :error
-    end
+    {owner, rest} = id |> String.split("/") |> owner()
+
+    with {:ok, _owner} <- Owners.parse(owner), do: new(owner, rest)
   end
 
   @doc """
@@ -53,12 +52,18 @@ defmodule Wardrik.AgentID do
   @spec conversation?(String.t()) :: boolean()
   def conversation?(id), do: match?({:ok, %__MODULE__{conversation: c}} when c != nil, parse(id))
 
-  defp new(owner, name, conversation) do
-    if Enum.all?(owner ++ [name | List.wrap(conversation)], &segment?/1),
-      do:
-        {:ok, %__MODULE__{owner: Enum.join(owner, "/"), name: name, conversation: conversation}},
+  defp owner([org, "@" <> _person = person | rest]), do: {org <> "/" <> person, rest}
+  defp owner([org | rest]), do: {org, rest}
+
+  defp new(owner, [name]), do: new(owner, [name, nil])
+
+  defp new(owner, [name, conversation]) do
+    if Enum.all?([name | List.wrap(conversation)], &segment?/1),
+      do: {:ok, %__MODULE__{owner: owner, name: name, conversation: conversation}},
       else: :error
   end
+
+  defp new(_owner, _rest), do: :error
 
   defp segment?(segment), do: segment != "" and not String.contains?(segment, ["*", "?", ":"])
 end

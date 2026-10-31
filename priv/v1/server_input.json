@@ -79,7 +79,7 @@
                   "required": [
                     "name"
                   ],
-                  "description": "The app's client secret, as a secret the owner keeps in the vault. It is sealed apart from the owner's secrets as the server is added, so it is never sent anywhere but the token endpoint.",
+                  "description": "The app's client secret, as a secret the owner keeps in the vault. It's read each time it's needed, so a new value takes effect at once, and never sent anywhere but the token endpoint.",
                   "properties": {
                     "name": {
                       "type": "string",

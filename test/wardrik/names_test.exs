@@ -29,6 +29,22 @@ defmodule Wardrik.NamesTest do
     end
   end
 
+  test "reads an agent's owner as an owner, so only the owner holds a person" do
+    for id <- [
+          "acme/@jon",
+          "ac@me/triage",
+          "acme/@j@n/triage",
+          "acme/@/triage",
+          "/triage",
+          "acme/@jon/triage/C1/2"
+        ] do
+      assert AgentID.parse(id) == :error, id
+    end
+
+    assert {:ok, %AgentID{owner: "acme", name: "triage", conversation: "@C1"}} =
+             AgentID.parse("acme/triage/@C1")
+  end
+
   test "names an agent's resource, and what an owner owns" do
     assert {:ok, "acme/agent/triage"} = Resource.agent("acme/triage")
 
@@ -38,6 +54,7 @@ defmodule Wardrik.NamesTest do
     assert Resource.agent("acme/*") == :error
     assert Resource.owned("acme", "secret", "github") == "acme/secret/github"
     assert Resource.owned("acme", "secret", nil) == "acme/secret"
+    assert Resource.owned("acme/@jon", "provider", "google") == "acme/@jon/provider/google"
     assert Resource.deployment() == "deployment"
   end
 
@@ -107,6 +124,7 @@ defmodule Wardrik.NamesTest do
           {%Wardrik.Call{id: "call_1"}, "call_1"},
           {%Wardrik.Trigger{name: "weekly"}, "weekly"},
           {%Wardrik.MCPServer{name: "linear"}, "linear"},
+          {%Wardrik.Provider{name: "google"}, "google"},
           {%Wardrik.Connection{provider: "github"}, "github"},
           {%Wardrik.Token{id: "3f9a"}, "3f9a"}
         ] do
