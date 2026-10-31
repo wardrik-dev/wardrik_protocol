@@ -9,7 +9,7 @@ functions, like `Wardrik.Agent.ask/3`, that packages built on Wardrik call.
 ```elixir
 def deps do
   [
-    {:wardrik_protocol, "~> 0.1.0-rc.1"}
+    {:wardrik_protocol, "~> 0.1.0-rc.2"}
   ]
 end
 ```
