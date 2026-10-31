@@ -8,6 +8,8 @@
 - An MCP server's browser sign-in can name an OAuth app as `provider`, and send
   `authorization_params`.
 - `Wardrik.Provider`.
+- `Wardrik.Owners`, moved from `wardrik`: parses an owner, and the chain its settings resolve
+  along, for every package that keeps settings by owner.
 
 ## 0.1.0-rc.1 (2026-10-30)
 
