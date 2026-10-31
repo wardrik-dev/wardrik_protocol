@@ -49,6 +49,32 @@ defmodule WardrikProtocolTest do
     end
   end
 
+  test "takes an OAuth app it can find, signing in only with parameters of its own" do
+    google = %{"name" => "google", "issuer" => "https://accounts.google.com"}
+
+    for name <- ["provider_input", "provider", "providers", "server_input"],
+        example <- WardrikProtocol.schema(name)["examples"],
+        do: assert(valid?(name, example), name)
+
+    assert valid?("provider_input", Map.put(google, "authorization_params", %{"prompt" => "x"}))
+    refute valid?("provider_input", Map.put(google, "authorization_params", %{"scope" => "x"}))
+    refute valid?("provider_input", %{"name" => "google", "client_id" => "app"})
+
+    refute valid?(
+             "provider_input",
+             Map.put(google, "authorization_endpoint", "https://accounts.google.com/auth")
+           )
+  end
+
+  test "signs in to a server with an OAuth app it names, or one it gives, never both" do
+    server = %{"name" => "ads", "url" => "https://mcp.ads.example/mcp"}
+    with_auth = &Map.put(server, "auth", %{"oauth" => &1})
+
+    assert valid?("server_input", with_auth.(%{"provider" => "google"}))
+    refute valid?("server_input", with_auth.(%{"provider" => "google", "client_id" => "app"}))
+    refute valid?("server_input", with_auth.(%{"provider" => "google", "scopes" => ["read"]}))
+  end
+
   test "checks an event and its data" do
     assert valid?("cloudevent", @event)
     assert valid?("tool_call.started", @event["data"])

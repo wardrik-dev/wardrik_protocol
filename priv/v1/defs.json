@@ -524,6 +524,17 @@
       },
       "additionalProperties": false,
       "description": "An amount in dollars, tokens or both. A limit leaves out what it doesn't limit."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Who holds it: deployment, an org as acme, or a person as acme/@jon."
+    },
+    "source": {
+      "enum": [
+        "config",
+        "runtime"
+      ],
+      "description": "config for one the deployment started with, which can't be changed at runtime; runtime for one added since."
     }
   }
 }
