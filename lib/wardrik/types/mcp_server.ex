@@ -1,12 +1,19 @@
 defmodule Wardrik.MCPServer do
   @moduledoc """
-  An MCP server an owner added for their agents: its `name`, `url`, and `auth`. `auth` is how
-  agents sign in to it: `:oauth`, `:secret` or `:none`.
+  An MCP server an owner's agents reach. `owner` holds it, and `source` is `:config` for one the
+  deployment started with, or `:runtime` for one added since. `auth` is how agents sign in to it:
+  `:oauth`, `:secret` or `:none`. `url` is `nil` for a command the deployment starts.
   """
 
   use Wardrik.Type,
     schema: ["server"],
-    fields: [name: "name", url: "url", auth: {"auth", [:oauth, :secret, :none]}]
+    fields: [
+      owner: "owner",
+      name: "name",
+      source: {"source", [:config, :runtime]},
+      url: "url",
+      auth: {"auth", [:oauth, :secret, :none]}
+    ]
 end
 
 defmodule Wardrik.MCPServerAdded do

@@ -75,6 +75,21 @@ defmodule WardrikProtocolTest do
     refute valid?("server_input", with_auth.(%{"provider" => "google", "scopes" => ["read"]}))
   end
 
+  test "says who holds each server and where it came from, and never its headers" do
+    for name <- ["server", "servers"],
+        example <- WardrikProtocol.schema(name)["examples"],
+        do: assert(valid?(name, example), name)
+
+    command = %{"owner" => "deployment", "name" => "git", "source" => "config", "auth" => "none"}
+    assert valid?("server", command)
+    refute valid?("server", Map.delete(command, "owner"))
+    refute valid?("server", Map.put(command, "source", "inline"))
+    refute valid?("server", Map.put(command, "headers", %{"authorization" => "Bearer x"}))
+
+    assert %Wardrik.MCPServer{owner: "deployment", source: :config, url: nil} =
+             Wardrik.MCPServer.from_json(command)
+  end
+
   test "checks an event and its data" do
     assert valid?("cloudevent", @event)
     assert valid?("tool_call.started", @event["data"])

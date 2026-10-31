@@ -17,6 +17,9 @@
 - `wardrik.provider.added` and `wardrik.provider.removed`.
 - `server_input` says an app's client secret is read each time it's needed, not sealed as the
   server is added.
+- `server` and `servers` say each server's `owner` and `source`, and `mcp_servers.list` answers
+  those the owner gets from further out, as `providers.list` does. `url` is left out for a
+  command the deployment starts. `Wardrik.MCPServer` has `owner` and `source`.
 
 ## 0.1.0-rc.1 (2026-10-30)
 
