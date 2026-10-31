@@ -49,35 +49,9 @@ defmodule Wardrik.FunctionsTest do
   end
 
   test "reads every property of the schema each type is of" do
-    types = [
-      Wardrik.Agent,
-      Wardrik.Activity,
-      Wardrik.Interrupt,
-      Wardrik.Message,
-      Wardrik.Decision,
-      Wardrik.Authorization,
-      Wardrik.Call,
-      Wardrik.Event,
-      Wardrik.Page,
-      Wardrik.Timeline,
-      Wardrik.Run,
-      Wardrik.Runs,
-      Wardrik.Runs.Totals,
-      Wardrik.Forgotten,
-      Wardrik.Definition,
-      Wardrik.Trigger,
-      Wardrik.Trigger.Webhook,
-      Wardrik.Connection,
-      Wardrik.Connecting,
-      Wardrik.MCPServer,
-      Wardrik.MCPServerAdded,
-      Wardrik.Token,
-      Wardrik.TokenIssued,
-      Wardrik.Nodes,
-      Wardrik.Node,
-      Wardrik.Spend,
-      Wardrik.Amount
-    ]
+    {:ok, modules} = :application.get_key(:wardrik_protocol, :modules)
+    types = Enum.filter(modules, &function_exported?(Code.ensure_loaded!(&1), :__schema__, 0))
+    assert Wardrik.Provider in types
 
     for type <- types do
       [name | path] = type.__schema__()

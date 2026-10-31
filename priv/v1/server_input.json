@@ -47,7 +47,7 @@
             "oauth": {
               "type": "object",
               "additionalProperties": false,
-              "description": "The owner signs in in a browser, and the token is kept for them. Left bare, the server's own authorization server is found from its URL, and Wardrik becomes its client itself. Where it can't be, as with a service that publishes no metadata or registers no clients, the owner gives the OAuth app they registered there: its issuer or its endpoints, its client_id, and the name of the secret they keep its client secret under.",
+              "description": "The owner signs in in a browser, and the token is kept for them. Left bare, the server's own authorization server is found from its URL, and Wardrik becomes its client itself. Where it can't be, as with a service that publishes no metadata or registers no clients, name an OAuth app the owner can use as provider, or give the app they registered there: its issuer or its endpoints, its client_id, and the name of the secret they keep its client secret under.",
               "properties": {
                 "scopes": {
                   "type": "array",
@@ -94,6 +94,32 @@
                     "basic"
                   ],
                   "description": "How the client secret is sent: in the form, or as HTTP Basic. post unless it says."
+                },
+                "authorization_params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "not": {
+                      "enum": [
+                        "response_type",
+                        "client_id",
+                        "redirect_uri",
+                        "scope",
+                        "state",
+                        "code_challenge",
+                        "code_challenge_method",
+                        "resource"
+                      ]
+                    }
+                  },
+                  "description": "Extra parameters for a browser sign-in, as access_type: offline. Can't set the ones Wardrik sends itself."
+                },
+                "provider": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$",
+                  "description": "An OAuth app to sign in with, by name: the owner's, their org's or the deployment's. Takes the place of an app given here."
                 }
               },
               "dependentRequired": {
@@ -109,6 +135,54 @@
                 "token_endpoint": [
                   "authorization_endpoint"
                 ]
+              },
+              "dependentSchemas": {
+                "provider": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "scopes"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "issuer"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "authorization_endpoint"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "token_endpoint"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "client_id"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "client_secret"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "client_auth"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "authorization_params"
+                        ]
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
@@ -205,6 +279,15 @@
           "scopes": [
             "repo"
           ]
+        }
+      }
+    },
+    {
+      "name": "ads",
+      "url": "https://mcp.ads.example/mcp",
+      "auth": {
+        "oauth": {
+          "provider": "google"
         }
       }
     }

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- `provider_input`, `provider` and `providers`: OAuth apps people sign in with, each held by an
+  owner and kept from config or at runtime, its client secret only ever named.
+- `owner` and `source` in `defs`, for every resource held at runtime.
+- An MCP server's browser sign-in can name an OAuth app as `provider`, and send
+  `authorization_params`.
+- `Wardrik.Provider`.
+
 ## 0.1.0-rc.1 (2026-10-30)
 
 - Wardrik's events as CloudEvents: a JSON Schema for each event type, and for the envelope.
