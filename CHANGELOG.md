@@ -14,6 +14,9 @@
   OAuth apps, listed with those it gets from further out.
 - `Wardrik.AgentID.parse/1` reads an agent's owner with `Wardrik.Owners.parse/1`, so an ID like
   `ac@me/triage` or `acme/@jon` is `:error`.
+- `wardrik.provider.added` and `wardrik.provider.removed`.
+- `server_input` says an app's client secret is read each time it's needed, not sealed as the
+  server is added.
 
 ## 0.1.0-rc.1 (2026-10-30)
 
