@@ -24,6 +24,7 @@
 
 ### Breaking
 
+- `secret_input` requires a `purpose`, and a secret's `kind` says what it's for.
 - `Wardrik.AgentID.parse/1` reads the owner with `Wardrik.Owners.parse/1`, so an ID like
   `ac@me/triage` or `acme/@jon` is `:error`.
 
