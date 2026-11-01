@@ -1,31 +1,31 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-rc.2 (2026-10-31)
 
-- `provider_input`, `provider` and `providers`: OAuth apps people sign in with, each held by an
-  owner and kept from config or at runtime, its client secret only ever named.
-- `owner` and `source` in `defs`, for every resource held at runtime.
-- An MCP server's browser sign-in can name an OAuth app as `provider`, and send
+- `Wardrik.Owners`: parses an owner, and gives the chain its settings resolve along, nearest
+  first, for every package that keeps settings by owner.
+- OAuth apps people sign in with: `providers.list`, `providers.add` and `providers.remove`,
+  `Wardrik.Providers` and `Wardrik.Provider`, the schemas `provider_input`, `provider` and
+  `providers`, and the events `wardrik.provider.added` and `wardrik.provider.removed`.
+- Webhooks an org or person adds for their agents' notices: `notify_targets.list`,
+  `notify_targets.add` and `notify_targets.remove`, `Wardrik.NotifyTargets` and
+  `Wardrik.NotifyTarget`, the schemas `notify_target_input`, `notify_target` and
+  `notify_targets`, and the events `wardrik.notify_target.added` and
+  `wardrik.notify_target.removed`.
+- `provider.read` and `notify_target.read` for `:reader`, `provider.add` and
+  `notify_target.add` for `:definer`.
+- `providers.list`, `mcp_servers.list` and `notify_targets.list` answer an owner's own and those
+  it gets from further out. Each says its `owner` and `source`, in `defs`, and `Wardrik.MCPServer`
+  has both. A server the deployment starts as a command has no `url`.
+- An MCP server's browser sign-in names an OAuth app as `provider`, or gives its own with
   `authorization_params`.
-- `Wardrik.Provider`.
-- `Wardrik.Owners`, moved from `wardrik`: parses an owner, and the chain its settings resolve
-  along, for every package that keeps settings by owner.
-- `providers.list`, `providers.add` and `providers.remove`, and `Wardrik.Providers`: an owner's
-  OAuth apps, listed with those it gets from further out.
-- `Wardrik.AgentID.parse/1` reads an agent's owner with `Wardrik.Owners.parse/1`, so an ID like
+- Secrets are only ever named: an app's client secret, read each time it's needed, and a notify
+  target's.
+
+### Breaking
+
+- `Wardrik.AgentID.parse/1` reads the owner with `Wardrik.Owners.parse/1`, so an ID like
   `ac@me/triage` or `acme/@jon` is `:error`.
-- `wardrik.provider.added` and `wardrik.provider.removed`.
-- `server_input` says an app's client secret is read each time it's needed, not sealed as the
-  server is added.
-- `server` and `servers` say each server's `owner` and `source`, and `mcp_servers.list` answers
-  those the owner gets from further out, as `providers.list` does. `url` is left out for a
-  command the deployment starts. `Wardrik.MCPServer` has `owner` and `source`.
-- `notify_targets.list`, `notify_targets.add` and `notify_targets.remove`, and
-  `Wardrik.NotifyTargets`: webhooks an org or person adds for their agents' notices, listed with
-  those it gets from further out. A target's secret is only ever named.
-- `notify_target_input`, `notify_target`, `notify_targets` and `Wardrik.NotifyTarget`.
-- `wardrik.notify_target.added` and `wardrik.notify_target.removed`.
-- `notify_target.read` for `:reader`, and `notify_target.add` for `:definer`.
 
 ## 0.1.0-rc.1 (2026-10-30)
 
