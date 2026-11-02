@@ -13,7 +13,11 @@ defmodule Wardrik.ServerTest do
   setup do
     %{
       scope:
-        Scope.new(Wardrik.Test.Server, self(), "acme/@maria", roles: [:owner], resources: ["*"])
+        Scope.new(Wardrik.Test.Server,
+          wardrik: self(),
+          principal: "acme/@maria",
+          grants: [roles: [:owner], resources: ["*"]]
+        )
     }
   end
 
@@ -52,14 +56,16 @@ defmodule Wardrik.ServerTest do
   end
 
   test "makes a scope with what it grants, and grants more" do
-    scope = Scope.new(Wardrik.Test.Server, :here, "acme/@jon")
+    scope = Scope.new(Wardrik.Test.Server, wardrik: :here, principal: "acme/@jon")
     assert %Scope{principal: %WardrikCore.Principal{id: "acme/@jon"}, grants: []} = scope
 
     assert %Scope{grants: [%Wardrik.Statement{resources: ["acme/agent/*"]}]} =
              Scope.grant(scope, roles: [:reader], resources: ["acme/agent/*"])
 
     statements = [Wardrik.Statement.new(actions: ["*"], resources: ["*"])]
-    assert %Scope{grants: ^statements} = Scope.new(Wardrik.Test.Server, :here, "acme", statements)
+
+    assert %Scope{grants: ^statements} =
+             Scope.new(Wardrik.Test.Server, wardrik: :here, principal: "acme", grants: statements)
   end
 
   defp answered?(:ok), do: true

@@ -37,23 +37,30 @@ defmodule Wardrik.Scope do
         }
 
   @doc """
-  Returns a scope for `principal` on `wardrik`, run by `server`.
+  Returns a scope for `:principal` on `:wardrik`, run by `server`.
 
-  `grants` is a list of `Wardrik.Statement`s, or the options for one.
+      Wardrik.Scope.new(Wardrik,
+        wardrik: MyApp.AgentRuntime,
+        principal: "acme/@maria",
+        grants: [roles: [:owner], resources: ["acme/@maria/*"]]
+      )
+
+  `:principal` is a `WardrikCore.Principal` or its ID. `:grants` is a list of
+  `Wardrik.Statement`s, or the options for one. `[]` unless set.
   """
-  @spec new(module(), atom(), Principal.t() | String.t(), term()) :: t()
-  def new(server, wardrik, principal, grants \\ [])
-
-  def new(server, wardrik, %Principal{} = principal, grants),
-    do: %__MODULE__{
+  @spec new(module(),
+          wardrik: atom() | struct(),
+          principal: Principal.t() | String.t(),
+          grants: term()
+        ) :: t()
+  def new(server, args) do
+    %__MODULE__{
       server: server,
-      wardrik: wardrik,
-      principal: principal,
-      grants: statements(grants)
+      wardrik: Keyword.fetch!(args, :wardrik),
+      principal: args |> Keyword.fetch!(:principal) |> principal(),
+      grants: args |> Keyword.get(:grants, []) |> statements()
     }
-
-  def new(server, wardrik, id, grants) when is_binary(id),
-    do: new(server, wardrik, %Principal{id: id}, grants)
+  end
 
   @doc "Adds a statement built from `opts` to the scope's grants. See `Wardrik.Statement.new/1`."
   @spec grant(t(), keyword()) :: t()
@@ -69,6 +76,9 @@ defmodule Wardrik.Scope do
   @spec stream(t(), String.t(), map()) :: {:ok, Enumerable.t()} | {:error, Wardrik.Error.t()}
   def stream(%__MODULE__{server: server} = scope, id, input),
     do: server.stream(%Wardrik.Server.Request{scope: scope, operation: id, input: input})
+
+  defp principal(%Principal{} = principal), do: principal
+  defp principal(id) when is_binary(id), do: %Principal{id: id}
 
   defp statements([{key, _value} | _rest] = opts) when key in [:roles, :actions, :resources],
     do: [Statement.new(opts)]

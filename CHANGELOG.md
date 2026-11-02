@@ -32,6 +32,8 @@
 - `secret_input` requires a `purpose`, and a secret's `kind` says what it's for.
 - `Wardrik.AgentID.parse/1` reads the owner with `Wardrik.Owners.parse/1`, so an ID like
   `ac@me/triage` or `acme/@jon` is `:error`.
+- `Wardrik.Scope.new/2` takes the server, then `:wardrik`, `:principal` and `:grants` by name.
+  `Wardrik.Resource.owned/2` takes the owner, then `:kind` and `:name`.
 
 ## 0.1.0-rc.1 (2026-10-30)
 
