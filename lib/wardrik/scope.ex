@@ -62,11 +62,13 @@ defmodule Wardrik.Scope do
 
   @doc "Runs operation `id` with `input` through the scope's server."
   @spec run(t(), String.t(), map()) :: {:ok, term()} | {:error, Wardrik.Error.t()}
-  def run(%__MODULE__{server: server} = scope, id, input), do: server.run(scope, id, input)
+  def run(%__MODULE__{server: server} = scope, id, input),
+    do: server.run(%Wardrik.Server.Request{scope: scope, operation: id, input: input})
 
   @doc "Streams operation `id` with `input` through the scope's server."
   @spec stream(t(), String.t(), map()) :: {:ok, Enumerable.t()} | {:error, Wardrik.Error.t()}
-  def stream(%__MODULE__{server: server} = scope, id, input), do: server.stream(scope, id, input)
+  def stream(%__MODULE__{server: server} = scope, id, input),
+    do: server.stream(%Wardrik.Server.Request{scope: scope, operation: id, input: input})
 
   defp statements([{key, _value} | _rest] = opts) when key in [:roles, :actions, :resources],
     do: [Statement.new(opts)]

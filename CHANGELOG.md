@@ -24,6 +24,11 @@
 
 ### Breaking
 
+- Every behaviour's callbacks take a request struct, then their options:
+  `Wardrik.Server`'s `run/1` and `stream/1` a `Wardrik.Server.Request`, and `follow/2` a
+  `Wardrik.Server.Follow`; `Wardrik.Channel`'s `request/2` the request, then the options, and
+  `notify/2` a `Wardrik.Channel.Notification`; `Wardrik.Channel.Installations`' callbacks a
+  `Wardrik.Channel.Installations.Request`, or the installation to `put/2`.
 - `secret_input` requires a `purpose`, and a secret's `kind` says what it's for.
 - `Wardrik.AgentID.parse/1` reads the owner with `Wardrik.Owners.parse/1`, so an ID like
   `ac@me/triage` or `acme/@jon` is `:error`.

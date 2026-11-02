@@ -35,21 +35,14 @@ defmodule Wardrik.Channel do
   @callback child_spec(opts :: keyword()) :: Supervisor.child_spec()
 
   @doc "Handles a request from the chat app and returns the response."
-  @callback request(opts :: keyword(), request()) :: response()
+  @callback request(request(), opts :: keyword()) :: response()
 
   @doc """
-  Posts `notice` in `room`, asking `approvers` to decide the calls a parked turn waits on.
-
-  `approvers` are named as the chat app names people. Returns `{:skip, reason}` if there's nowhere
-  to post. Optional: a channel without it posts no notices. See `Wardrik.Notify`.
+  Posts a `Wardrik.Channel.Notification`. Returns `{:skip, reason}` if there's nowhere to post.
+  Optional: a channel without it posts no notices. See `Wardrik.Notify`.
   """
-  @callback notify(
-              opts :: keyword(),
-              room :: String.t(),
-              Wardrik.Notice.t(),
-              approvers :: [String.t()]
-            ) ::
+  @callback notify(Wardrik.Channel.Notification.t(), opts :: keyword()) ::
               :ok | {:skip, String.t()} | {:error, term()}
 
-  @optional_callbacks notify: 4
+  @optional_callbacks notify: 2
 end

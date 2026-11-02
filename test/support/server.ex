@@ -16,24 +16,32 @@ defmodule Wardrik.Test.Server do
   }
 
   @impl Wardrik.Server
-  def run(%Wardrik.Scope{wardrik: test}, id, input) do
+  def run(%Wardrik.Server.Request{
+        scope: %Wardrik.Scope{wardrik: test},
+        operation: id,
+        input: input
+      }) do
     send(test, {:ran, id, input})
     {:ok, example(id)}
   end
 
   @impl Wardrik.Server
-  def stream(%Wardrik.Scope{wardrik: test}, id, input) do
+  def stream(%Wardrik.Server.Request{
+        scope: %Wardrik.Scope{wardrik: test},
+        operation: id,
+        input: input
+      }) do
     send(test, {:streamed, id, input})
     {:ok, [{@event, "cursor-1"}]}
   end
 
   @impl Wardrik.Server
-  def follow(_scope, "acme/broken", _input, _opts), do: [{:text, "Half"}, {:failed, "It broke."}]
+  def follow(%{agent: "acme/broken"}, _opts), do: [{:text, "Half"}, {:failed, "It broke."}]
 
-  def follow(_scope, "acme/waiting", _input, _opts),
+  def follow(%{agent: "acme/waiting"}, _opts),
     do: [{:waiting, [%Wardrik.Interrupt{id: "c1", reason: :tool_approval}]}]
 
-  def follow(_scope, _agent, input, _opts),
+  def follow(%{input: input}, _opts),
     do: [
       {:text, "Re: "},
       {:text, input},
