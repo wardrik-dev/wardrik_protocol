@@ -7,7 +7,7 @@
       "name": "Apache-2.0",
       "identifier": "Apache-2.0"
     },
-    "description": "Wardrik's operations. Each is named by its operationId, everywhere it's offered: over HTTP, in the CLI, as an agent's tool. x-wardrik-action is what a caller must be allowed to do, x-wardrik-effect whether it reads, changes or destroys, and x-wardrik-subject what it acts on: one agent, the agents patterns cover, or the deployment. An agent the caller reaches none of is answered as one that doesn't exist."
+    "description": "Wardrik's operations. Each is named by its operationId, everywhere it's offered: over HTTP, in the CLI, as an agent's tool. x-wardrik-action is what a caller must be allowed to do, x-wardrik-effect whether it reads, changes or destroys, and x-wardrik-subject what it acts on: one agent, many agents, or the deployment. An agent the caller reaches none of is answered as one that doesn't exist."
   },
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "security": [
@@ -29,7 +29,7 @@
     "/v1/agents": {
       "get": {
         "operationId": "agents.list",
-        "summary": "List the agents the patterns cover",
+        "summary": "List the agents",
         "tags": [
           "Agents"
         ],
@@ -38,7 +38,7 @@
         "x-wardrik-subject": "agents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           }
         ],
         "responses": {
@@ -62,7 +62,7 @@
       },
       "delete": {
         "operationId": "agents.forget",
-        "summary": "Forget every agent the patterns cover",
+        "summary": "Forget the agents",
         "description": "Each agent goes as agent.forget takes it: stopped, with its conversation, definition and triggers deleted.",
         "tags": [
           "Agents"
@@ -72,7 +72,7 @@
         "x-wardrik-subject": "agents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           }
         ],
         "responses": {
@@ -107,7 +107,7 @@
         "x-wardrik-subject": "agents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           }
         ],
         "responses": {
@@ -133,7 +133,7 @@
     "/v1/events": {
       "get": {
         "operationId": "events.list",
-        "summary": "Read the events of the agents the patterns cover",
+        "summary": "Read the agents' events",
         "description": "A page reads after the cursor, from the start without one. A stream reads after the cursor, from what's written next without one. Where a log was trimmed past the cursor, a wardrik.events.dropped says so, and the log is read on from the oldest event it holds.",
         "tags": [
           "Agents"
@@ -143,7 +143,7 @@
         "x-wardrik-subject": "agents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           },
           {
             "$ref": "#/components/parameters/types"
@@ -183,7 +183,7 @@
     "/v1/events/head": {
       "get": {
         "operationId": "events.head",
-        "summary": "Read where the logs the patterns cover stand",
+        "summary": "Read where the agents' logs stand",
         "tags": [
           "Agents"
         ],
@@ -192,7 +192,7 @@
         "x-wardrik-subject": "agents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           }
         ],
         "responses": {
@@ -828,7 +828,7 @@
     "/v1/agents/cancel": {
       "post": {
         "operationId": "agents.cancel",
-        "summary": "Stop what every agent the patterns cover is doing",
+        "summary": "Stop what the agents are doing",
         "tags": [
           "Agents"
         ],
@@ -837,7 +837,7 @@
         "x-wardrik-subject": "agents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           }
         ],
         "responses": {
@@ -1849,141 +1849,11 @@
         }
       }
     },
-    "/v1/tokens": {
-      "get": {
-        "operationId": "tokens.list",
-        "summary": "List the API tokens",
-        "description": "Every token, oldest first, never a secret. With resources, only the tokens whose every resource the patterns cover, as acme/agent/* lists the tokens over acme's agents alone.",
-        "tags": [
-          "Tokens"
-        ],
-        "x-wardrik-action": "deployment.tokens",
-        "x-wardrik-effect": "read",
-        "x-wardrik-subject": "deployment",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/resources"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Every token, never a secret.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "urn:wardrik:schema:v1:tokens"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Invalid"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      },
-      "post": {
-        "operationId": "tokens.create",
-        "summary": "Make an API token",
-        "description": "The token acts for whoever makes it, and is kept as the SHA-256 of its secret. It works for 90 days, or expires_in seconds. It is no wider than its maker: each action its roles allow, on each resource it names, is one its maker may take there; it is held to its maker's policy where its maker is held to one; and it expires no later than its maker does.",
-        "tags": [
-          "Tokens"
-        ],
-        "x-wardrik-action": "deployment.tokens",
-        "x-wardrik-effect": "change",
-        "x-wardrik-subject": "deployment",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "urn:wardrik:schema:v1:token_input"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The token, and its secret, given this once.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "urn:wardrik:schema:v1:token_issued"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Invalid"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      }
-    },
-    "/v1/tokens/{token}": {
-      "delete": {
-        "operationId": "tokens.revoke",
-        "summary": "Revoke an API token",
-        "description": "A revoked token is refused at once. An agent it defined keeps running, under the policy it was defined with.",
-        "tags": [
-          "Tokens"
-        ],
-        "x-wardrik-action": "deployment.tokens",
-        "x-wardrik-effect": "destructive",
-        "x-wardrik-subject": "deployment",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/token"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The token, as it was.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "urn:wardrik:schema:v1:token"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Invalid"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      }
-    },
     "/v1/deployment/reload": {
       "post": {
         "operationId": "deployment.reload",
         "summary": "Read every agent's definition again",
-        "description": "Each awake agent takes its definition as it reads now from its next turn, and each sleeping one as it wakes. With resources, only the agents the patterns cover are brought to theirs. The node that answers reads its declarations, servers and triggers again too.",
+        "description": "Each awake agent takes its definition as it reads now from its next turn, and each sleeping one as it wakes. With agents, only those agents are brought to theirs. The node that answers reads its declarations, servers and triggers again too.",
         "tags": [
           "Deployment"
         ],
@@ -1992,7 +1862,7 @@
         "x-wardrik-subject": "deployment",
         "parameters": [
           {
-            "$ref": "#/components/parameters/resources"
+            "$ref": "#/components/parameters/agents"
           }
         ],
         "responses": {
@@ -2352,18 +2222,18 @@
           "type": "string"
         }
       },
-      "resources": {
-        "name": "resources",
+      "agents": {
+        "name": "agents",
         "in": "query",
         "required": false,
         "style": "form",
         "explode": true,
-        "description": "Patterns of the agents to cover, as acme/agent/* or acme/@jon/*, given once for each. * stands for any run of characters, and ? for one. Every agent the caller reaches where left out.",
+        "description": "The agents to cover, by ID, as acme/triage or acme/@jon/triage, given once for each. Every agent the caller reaches where left out.",
         "schema": {
           "type": "array",
           "items": {
             "type": "string",
-            "minLength": 1
+            "pattern": "^[^/@_:*?\\s][^/:*?\\s]*(/@[^/@_:*?\\s][^/:*?\\s]*)?/[^/@_:*?\\s][^/:*?\\s]*(/[^/@_:*?\\s][^/:*?\\s]*)?$"
           }
         }
       },
@@ -2477,15 +2347,6 @@
           "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,31}$"
         }
       },
-      "token": {
-        "name": "token",
-        "in": "path",
-        "required": true,
-        "description": "The token's id.",
-        "schema": {
-          "type": "string"
-        }
-      },
       "channel": {
         "name": "channel",
         "in": "path",
@@ -2593,7 +2454,7 @@
       "bearer": {
         "type": "http",
         "scheme": "bearer",
-        "description": "A token, or what the host's authenticator takes."
+        "description": "What the host's authenticator takes."
       }
     }
   }

@@ -49,27 +49,13 @@ defmodule Wardrik.Test.Server do
     ]
 
   @impl Wardrik.Server
-  def authenticate(_wardrik, _secret), do: {:error, Wardrik.Error.new(:unauthorized, "No.")}
-
-  @impl Wardrik.Server
   def offer(_scope, _tools), do: :ok
 
   @impl Wardrik.Server
   def answer(_call, _message), do: :ok
 
-  @token %{
-    "id" => "3f9a61c0d4e2",
-    "name" => "ci",
-    "principal" => %{"id" => "acme/@maria"},
-    "statements" => [%{"actions" => ["agent.read"], "resources" => ["acme/agent/*"]}],
-    "created_at" => "2026-10-28T12:00:00Z"
-  }
-
   @answers %{
     "agents.list" => %{"agents" => [%{"id" => "acme/triage", "name" => "triage"}]},
-    "tokens.list" => %{"tokens" => [@token]},
-    "tokens.create" => %{"token" => @token, "secret" => "wrk_3f9a61c0d4e2_9c1e"},
-    "tokens.revoke" => @token,
     "agent.timeline" => %{"items" => [], "next" => nil},
     "agent.runs" => %{"runs" => [], "totals" => %{}, "next" => nil}
   }

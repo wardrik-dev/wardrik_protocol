@@ -2,8 +2,8 @@ defmodule Wardrik.NamesTest do
   use ExUnit.Case, async: true
 
   alias Wardrik.AgentID
+  alias Wardrik.Channel.Installation
   alias Wardrik.Resource
-  alias Wardrik.Statement
 
   test "reads an agent's ID, a person's agent's, and a conversation of either" do
     assert {:ok, %AgentID{owner: "acme", name: "triage", conversation: nil}} =
@@ -45,30 +45,23 @@ defmodule Wardrik.NamesTest do
              AgentID.parse("acme/triage/@C1")
   end
 
-  test "names an agent's resource, and what an owner owns" do
-    assert {:ok, "acme/agent/triage"} = Resource.agent("acme/triage")
-
-    assert {:ok, "acme/agent/triage/conversation/C1-1.1"} =
-             Resource.agent("acme/triage/C1-1.1")
-
-    assert Resource.agent("acme/*") == :error
-    assert Resource.owned("acme", kind: "secret", name: "github") == "acme/secret/github"
-    assert Resource.owned("acme", kind: "secret") == "acme/secret"
-
-    assert Resource.owned("acme/@jon", kind: "provider", name: "google") ==
-             "acme/@jon/provider/google"
-
+  test "names the deployment as an owner" do
     assert Resource.deployment() == "deployment"
   end
 
-  test "builds a statement from roles, and reads and writes it as JSON" do
-    statement = Statement.new(roles: [:reader], resources: ["acme/agent/*"])
-    assert "agent.read" in statement.actions
-    assert "notify_target.read" in statement.actions
-    assert "notify_target.add" in Statement.new(roles: [:definer], resources: ["*"]).actions
-    assert Statement.from_json(Statement.to_json(statement)) == statement
-    assert Statement.role("owner") == {:ok, :owner}
-    assert Statement.role("root") == :error
+  test "knows which agents are an installation owner's own" do
+    installation = %Installation{
+      channel: "slack",
+      workspace: "T0123",
+      owner: "acme",
+      token: "xoxb"
+    }
+
+    assert Installation.owns?(installation, "acme/triage")
+    assert Installation.owns?(installation, "acme/triage/C1-1.1")
+    refute Installation.owns?(installation, "acme/@jon/notes")
+    refute Installation.owns?(installation, "beta/triage")
+    refute Installation.owns?(installation, "acme")
   end
 
   test "writes an error as the protocol's error body, and raises it saying why" do
@@ -131,8 +124,7 @@ defmodule Wardrik.NamesTest do
           {%Wardrik.MCPServer{name: "linear"}, "linear"},
           {%Wardrik.Provider{name: "google"}, "google"},
           {%Wardrik.NotifyTarget{name: "ops"}, "ops"},
-          {%Wardrik.Connection{provider: "github"}, "github"},
-          {%Wardrik.Token{id: "3f9a"}, "3f9a"}
+          {%Wardrik.Connection{provider: "github"}, "github"}
         ] do
       assert types.path(struct) == name
     end

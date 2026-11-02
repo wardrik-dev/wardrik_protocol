@@ -35,7 +35,13 @@ defmodule Wardrik.Channel.Installation do
           approvers: [String.t()] | :anyone
         }
 
-  @doc "Returns the resource pattern for the owner's agents, as `acme/agent/*`."
-  @spec agents(t()) :: String.t()
-  def agents(%__MODULE__{owner: owner}), do: owner <> "/agent/*"
+  @doc """
+  Returns whether the agent or conversation `id` is the installation owner's own.
+
+      Wardrik.Channel.Installation.owns?(installation, "acme/triage/C1-1696.1234")
+      #=> true
+  """
+  @spec owns?(t(), String.t()) :: boolean()
+  def owns?(%__MODULE__{owner: owner}, id),
+    do: match?({:ok, %Wardrik.AgentID{owner: ^owner}}, Wardrik.AgentID.parse(id))
 end

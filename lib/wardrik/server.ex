@@ -2,7 +2,7 @@ defmodule Wardrik.Server do
   @moduledoc """
   A behaviour for what runs Wardrik's operations.
 
-  `Wardrik.Agent`, `Wardrik.Tokens` and the other typed modules call the server their
+  `Wardrik.Agent` and the other typed modules call the server their
   `Wardrik.Scope` names. Packages built on the protocol call those modules without depending on
   the server. The `wardrik` hub implements it.
   """
@@ -23,10 +23,6 @@ defmodule Wardrik.Server do
   Raises `Wardrik.Error` if the agent can't be reached.
   """
   @callback follow(Wardrik.Server.Follow.t(), opts :: keyword()) :: Enumerable.t()
-
-  @doc "Returns the scope an API token's `secret` acts in on `wardrik`, or an error."
-  @callback authenticate(wardrik :: atom(), secret :: String.t()) ::
-              {:ok, Wardrik.Scope.t()} | {:error, Wardrik.Error.t()}
 
   @doc """
   Offers a worker's tools, as MCP's `tools/list` returns them, to the agents `scope` may serve.
