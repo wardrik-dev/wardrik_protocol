@@ -27,8 +27,6 @@ defmodule Wardrik.Operations.Types do
   alias Wardrik.Secret
   alias Wardrik.Spend
   alias Wardrik.Timeline
-  alias Wardrik.Token
-  alias Wardrik.TokenIssued
   alias Wardrik.Trigger
   alias Wardrik.Type
 
@@ -45,8 +43,6 @@ defmodule Wardrik.Operations.Types do
     "agent.timeline" => Timeline,
     "agent.runs" => Runs,
     "agents.forget" => Forgotten,
-    "tokens.create" => TokenIssued,
-    "tokens.revoke" => Token,
     "deployment.nodes" => Nodes,
     "connections.connect" => Connecting,
     "connections.disconnect" => Connection,
@@ -62,7 +58,6 @@ defmodule Wardrik.Operations.Types do
     "agent.calls" => {"calls", Call, :from_json},
     "agents.list" => {"agents", Agent, :from_summary},
     "interrupts.list" => {"interrupts", Interrupt, :from_listed},
-    "tokens.list" => {"tokens", Token, :from_json},
     "connections.list" => {"connections", Connection, :from_json},
     "mcp_servers.list" => {"servers", MCPServer, :from_json},
     "providers.list" => {"providers", Provider, :from_json},
@@ -84,7 +79,6 @@ defmodule Wardrik.Operations.Types do
   def path(%Provider{name: name}), do: name
   def path(%NotifyTarget{name: name}), do: name
   def path(%Connection{provider: provider}), do: provider
-  def path(%Token{id: id}), do: id
 
   @doc "Converts an Elixir caller's `input` to the operation's JSON input."
   @spec encode(String.t(), term()) :: map()

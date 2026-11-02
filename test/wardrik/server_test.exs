@@ -12,12 +12,7 @@ defmodule Wardrik.ServerTest do
 
   setup do
     %{
-      scope:
-        Scope.new(Wardrik.Test.Server,
-          wardrik: self(),
-          principal: "acme/@maria",
-          grants: [roles: [:owner], resources: ["*"]]
-        )
+      scope: Scope.new(Wardrik.Test.Server, wardrik: self(), principal: "acme/@maria")
     }
   end
 
@@ -59,17 +54,23 @@ defmodule Wardrik.ServerTest do
     assert_receive {Wardrik, ^ref, {:done, %Wardrik.Reply{}}}
   end
 
-  test "makes a scope with what it grants, and grants more" do
+  test "makes a scope for a principal acting directly, or through an actor" do
     scope = Scope.new(Wardrik.Test.Server, wardrik: :here, principal: "acme/@jon")
-    assert %Scope{principal: %WardrikCore.Principal{id: "acme/@jon"}, grants: []} = scope
 
-    assert %Scope{grants: [%Wardrik.Statement{resources: ["acme/agent/*"]}]} =
-             Scope.grant(scope, roles: [:reader], resources: ["acme/agent/*"])
+    assert %Scope{principal: %WardrikCore.Principal{id: "acme/@jon"}, actor: nil, context: %{}} =
+             scope
 
-    statements = [Wardrik.Statement.new(actions: ["*"], resources: ["*"])]
+    assert %Scope{actor: {:agent, "acme/@jon/notes"}, context: %{asked_by: "acme/@jon"}} =
+             Scope.new(Wardrik.Test.Server,
+               wardrik: :here,
+               principal: "acme/@jon",
+               actor: {:agent, "acme/@jon/notes"},
+               context: %{asked_by: "acme/@jon"}
+             )
 
-    assert %Scope{grants: ^statements} =
-             Scope.new(Wardrik.Test.Server, wardrik: :here, principal: "acme", grants: statements)
+    assert_raise ArgumentError, fn ->
+      Scope.new(Wardrik.Test.Server, wardrik: :here, principal: "acme", grants: [])
+    end
   end
 
   defp answered?(:ok), do: true

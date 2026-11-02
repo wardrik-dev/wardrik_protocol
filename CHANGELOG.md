@@ -12,8 +12,6 @@
   `Wardrik.NotifyTarget`, the schemas `notify_target_input`, `notify_target` and
   `notify_targets`, and the events `wardrik.notify_target.added` and
   `wardrik.notify_target.removed`.
-- `provider.read` and `notify_target.read` for `:reader`, `provider.add` and
-  `notify_target.add` for `:definer`.
 - `providers.list`, `mcp_servers.list` and `notify_targets.list` answer an owner's own and those
   it gets from further out. Each says its `owner` and `source`, in `defs`, and `Wardrik.MCPServer`
   has both. A server the deployment starts as a command has no `url`.
@@ -32,8 +30,13 @@
 - `secret_input` requires a `purpose`, and a secret's `kind` says what it's for.
 - `Wardrik.AgentID.parse/1` reads the owner with `Wardrik.Owners.parse/1`, so an ID like
   `ac@me/triage` or `acme/@jon` is `:error`.
-- `Wardrik.Scope.new/2` takes the server, then `:wardrik`, `:principal` and `:grants` by name.
-  `Wardrik.Resource.owned/2` takes the owner, then `:kind` and `:name`.
+- No grants or tokens: `Wardrik.Statement`, `Wardrik.Tokens`, `Wardrik.Token`, the `tokens.*`
+  operations and their schemas, `c:Wardrik.Server.authenticate/2`, and `Wardrik.Resource`'s
+  `agent/1` and `owned/2` are gone. `Wardrik.Scope.new/2` takes the server, then `:wardrik`,
+  `:principal`, `:actor` and `:context` by name. `agents.list`, `agents.forget`,
+  `agents.cancel`, `interrupts.list`, `events.list`, `events.head` and `deployment.reload` take
+  `agents`, exact agent IDs, for `resources`. `Wardrik.Channel.Installation.owns?/2` replaces
+  `agents/1`.
 - An operation's function with two or more path parameters takes them by name in its input, as
   `Wardrik.Agent.approve(scope, agent: "acme/books", interrupt: "call_1")`: `Wardrik.Agent`'s
   `approve/2`, `deny/2`, `kill/2`, `authorization/2`, `trigger_set/2` and `trigger_remove/2`,

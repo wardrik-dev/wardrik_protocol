@@ -1,38 +1,50 @@
 defmodule Wardrik.Scope do
   @moduledoc """
-  Who is acting through Wardrik, and what they may do.
+  Who is acting through Wardrik, and on whose behalf.
 
-      scope = MyApp.AgentRuntime.as("acme/@maria", roles: [:owner], resources: ["acme/@maria/*"])
+      scope = MyApp.AgentRuntime.as("acme/@maria")
 
-  `Wardrik.as/3` makes a scope. `Wardrik.grant/2` adds to it.
+  `Wardrik.as/3` makes a scope. The host's `Wardrik.Authorizer` decides what it may do.
+
+  As in RFC 8693, `:principal` is on whose behalf the scope acts, and `:actor` is who acts:
+
+      # Maria herself
+      MyApp.AgentRuntime.as("acme/@maria")
+
+      # Maria's assistant, through its own tools
+      MyApp.AgentRuntime.as("acme/@maria", actor: {:agent, "acme/@maria/assistant"})
 
   ## Fields
 
     * `:server` - the `Wardrik.Server` that runs its operations.
     * `:wardrik` - which Wardrik, by name.
-    * `:principal` - who is acting.
-    * `:grants` - what the authorizer reads to decide what they may do.
-    * `:policy` - in a token's scope, the policy every agent it defines is held to.
-    * `:expires` - in a token's scope, when the token expires.
+    * `:principal` - on whose behalf it acts.
+    * `:actor` - who acts, as `{:agent, id}` or `{:channel, name}`, or `nil` when the principal
+      acts directly.
+    * `:context` - what the actor knows that the authorizer may read, as a channel's
+      `:asked_by`. `%{}` unless set.
+    * `:policy` - in an agent's scope, the policy every agent it defines is held to.
     * `:labels` - in an agent's scope, the labels of what its run has read. Messages it sends
       carry them too.
     * `:operation` - the operation running, while one runs.
   """
 
-  alias Wardrik.Statement
   alias WardrikCore.Principal
 
   @enforce_keys [:server, :wardrik, :principal]
-  defstruct [:server, :wardrik, :principal, :operation, :policy, :expires, grants: [], labels: []]
+  defstruct [:server, :wardrik, :principal, :actor, :operation, :policy, context: %{}, labels: []]
+
+  @typedoc "Who acts for the principal, by kind and ID, or `nil` when the principal acts directly."
+  @type actor() :: {atom(), String.t()} | nil
 
   @type t() :: %__MODULE__{
           server: module(),
           wardrik: atom() | struct(),
           principal: Principal.t(),
+          actor: actor(),
+          context: map(),
           operation: WardrikProtocol.operation() | nil,
-          grants: term(),
           policy: String.t() | map() | nil,
-          expires: DateTime.t() | nil,
           labels: [String.t()]
         }
 
@@ -42,30 +54,30 @@ defmodule Wardrik.Scope do
       Wardrik.Scope.new(Wardrik,
         wardrik: MyApp.AgentRuntime,
         principal: "acme/@maria",
-        grants: [roles: [:owner], resources: ["acme/@maria/*"]]
+        actor: {:channel, "slack"},
+        context: %{approver: true}
       )
 
-  `:principal` is a `WardrikCore.Principal` or its ID. `:grants` is a list of
-  `Wardrik.Statement`s, or the options for one. `[]` unless set.
+  `:principal` is a `WardrikCore.Principal` or its ID. `:actor` is `nil` and `:context` `%{}`
+  unless set.
   """
   @spec new(module(),
           wardrik: atom() | struct(),
           principal: Principal.t() | String.t(),
-          grants: term()
+          actor: actor(),
+          context: map()
         ) :: t()
   def new(server, args) do
+    args = Keyword.validate!(args, [:wardrik, :principal, actor: nil, context: %{}])
+
     %__MODULE__{
       server: server,
       wardrik: Keyword.fetch!(args, :wardrik),
       principal: args |> Keyword.fetch!(:principal) |> principal(),
-      grants: args |> Keyword.get(:grants, []) |> statements()
+      actor: args[:actor],
+      context: args[:context]
     }
   end
-
-  @doc "Adds a statement built from `opts` to the scope's grants. See `Wardrik.Statement.new/1`."
-  @spec grant(t(), keyword()) :: t()
-  def grant(%__MODULE__{grants: grants} = scope, opts) when is_list(grants),
-    do: %{scope | grants: grants ++ [Statement.new(opts)]}
 
   @doc "Runs operation `id` with `input` through the scope's server."
   @spec run(t(), String.t(), map()) :: {:ok, term()} | {:error, Wardrik.Error.t()}
@@ -79,9 +91,4 @@ defmodule Wardrik.Scope do
 
   defp principal(%Principal{} = principal), do: principal
   defp principal(id) when is_binary(id), do: %Principal{id: id}
-
-  defp statements([{key, _value} | _rest] = opts) when key in [:roles, :actions, :resources],
-    do: [Statement.new(opts)]
-
-  defp statements(grants), do: grants
 end

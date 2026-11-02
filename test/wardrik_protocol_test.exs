@@ -26,7 +26,7 @@ defmodule WardrikProtocolTest do
     do: match?({:ok, _value}, JSV.validate(value, JSV.build!(WardrikProtocol.schema(name))))
 
   test "lists every event's type" do
-    assert Enum.count(WardrikProtocol.types()) == 55
+    assert Enum.count(WardrikProtocol.types()) == 53
     assert "wardrik.run.started" in WardrikProtocol.types()
 
     assert WardrikProtocol.dataschema("wardrik.run.started") ==
@@ -164,8 +164,7 @@ defmodule WardrikProtocolTest do
                mcp_servers.add mcp_servers.list mcp_servers.remove
                notify_targets.add notify_targets.list notify_targets.remove
                providers.add providers.list providers.remove secrets.delete secrets.list
-               secrets.put tokens.create tokens.list
-               tokens.revoke
+               secrets.put
              )
 
       assert WardrikProtocol.operation("agent.unknown") == nil
@@ -226,7 +225,9 @@ defmodule WardrikProtocolTest do
              )
 
       events = JSV.build!(WardrikProtocol.operation("events.list").input)
-      assert {:ok, _input} = JSV.validate(%{"resources" => ["acme/*"], "limit" => 5}, events)
+      assert {:ok, _input} = JSV.validate(%{"agents" => ["acme/triage"], "limit" => 5}, events)
+      refute match?({:ok, _input}, JSV.validate(%{"agents" => ["acme/*"]}, events))
+      refute match?({:ok, _input}, JSV.validate(%{"resources" => ["acme/*"]}, events))
       refute match?({:ok, _input}, JSV.validate(%{"limit" => 501}, events))
       refute match?({:ok, _input}, JSV.validate(%{"unknown" => 1}, events))
     end
