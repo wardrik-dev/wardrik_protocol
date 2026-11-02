@@ -34,6 +34,10 @@
   `ac@me/triage` or `acme/@jon` is `:error`.
 - `Wardrik.Scope.new/2` takes the server, then `:wardrik`, `:principal` and `:grants` by name.
   `Wardrik.Resource.owned/2` takes the owner, then `:kind` and `:name`.
+- An operation's function with two or more path parameters takes them by name in its input, as
+  `Wardrik.Agent.approve(scope, agent: "acme/books", interrupt: "call_1")`: `Wardrik.Agent`'s
+  `approve/2`, `deny/2`, `kill/2`, `authorization/2`, `trigger_set/2` and `trigger_remove/2`,
+  `Wardrik.Hook.deliver/2` and `deliver_with_secret/2`, and `Wardrik.Channel.deliver/2`.
 
 ## 0.1.0-rc.1 (2026-10-30)
 

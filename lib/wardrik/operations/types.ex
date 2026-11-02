@@ -98,6 +98,16 @@ defmodule Wardrik.Operations.Types do
   def encode(_id, []), do: %{}
   def encode(_id, input), do: Type.json(input)
 
+  @doc """
+  Converts an Elixir caller's `input` to the operation's JSON input, taking the path parameters
+  `keys` from it. Raises `KeyError` if one is missing.
+  """
+  @spec named(String.t(), keyword(), [atom()]) :: map()
+  def named(id, input, keys) do
+    path = Map.new(keys, &{Atom.to_string(&1), path(Keyword.fetch!(input, &1))})
+    Map.merge(encode(id, Keyword.drop(input, keys)), path)
+  end
+
   @doc "Converts the operation's JSON output to what an Elixir caller gets."
   @spec decode(String.t(), map() | nil) :: term()
   def decode(id, output) when id in @snapshots, do: {:ok, Agent.from_json(output)}

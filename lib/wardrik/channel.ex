@@ -10,7 +10,12 @@ defmodule Wardrik.Channel do
   reach `c:request/2` unchanged, so the channel can verify them, for example by a signature over
   the body. To deliver one yourself:
 
-      {:ok, answer} = Wardrik.Channel.deliver(scope, "slack", "events", body: body, headers: headers)
+      {:ok, answer} = Wardrik.Channel.deliver(scope,
+        channel: "slack",
+        path: "events",
+        body: body,
+        headers: headers
+      )
 
   Every callback gets the channel's options, plus:
 

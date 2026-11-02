@@ -5,7 +5,7 @@ defmodule Wardrik.FunctionsTest do
   alias Wardrik.Operations.Types
 
   test "does every operation with a function taking its path parameters" do
-    for operation <- WardrikProtocol.operations() do
+    for operation <- WardrikProtocol.operations(), not named?(operation) do
       module = Functions.module(Functions.prefix(operation))
       arity = 2 + length(Functions.path(operation))
 
@@ -14,6 +14,26 @@ defmodule Wardrik.FunctionsTest do
       assert function_exported?(module, Functions.name(operation), arity - 1), operation.id
     end
   end
+
+  test "names two or more path parameters in the input" do
+    for operation <- WardrikProtocol.operations(), named?(operation) do
+      module = Code.ensure_loaded!(Functions.module(Functions.prefix(operation)))
+
+      assert function_exported?(module, Functions.name(operation), 2), operation.id
+      refute function_exported?(module, Functions.name(operation), 3), operation.id
+    end
+
+    assert Types.named("agent.deny", [agent: "acme/books", interrupt: "call_1", reason: "No."], [
+             :agent,
+             :interrupt
+           ]) == %{"agent" => "acme/books", "interrupt" => "call_1", "reason" => "No."}
+
+    assert_raise KeyError, fn ->
+      Types.named("agent.kill", [agent: "acme/books"], [:agent, :call])
+    end
+  end
+
+  defp named?(operation), do: match?([_first, _second | _more], Functions.path(operation))
 
   test "streams every operation that can be streamed, and nothing else" do
     for operation <- WardrikProtocol.operations() do

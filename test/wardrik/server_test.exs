@@ -25,14 +25,18 @@ defmodule Wardrik.ServerTest do
     for %{id: id} = operation <- WardrikProtocol.operations() do
       assert Wardrik.Test.Server.answers?(operation), "The test server can't answer #{id}."
       module = Functions.module(Functions.prefix(operation))
-      path = Enum.map(Functions.path(operation), fn _parameter -> "x" end)
-      args = [scope | path] ++ [Map.get(@inputs, id, [])]
+      args = [scope | arguments(Functions.path(operation), Map.get(@inputs, id, []))]
 
       assert apply(module, Functions.name(operation), args) |> answered?(), id
       assert_received {:ran, ^id, input}
       assert Enum.all?(Functions.path(operation), &(input[&1] == "x")), id
     end
   end
+
+  defp arguments([_first, _second | _more] = path, []),
+    do: [Enum.map(path, &{String.to_atom(&1), "x"})]
+
+  defp arguments(path, input), do: Enum.map(path, fn _parameter -> "x" end) ++ [input]
 
   test "streams through the scope's server as structs, each with its cursor", %{scope: scope} do
     assert {:ok, stream} = Wardrik.Agent.stream_events(scope, "acme/triage")
