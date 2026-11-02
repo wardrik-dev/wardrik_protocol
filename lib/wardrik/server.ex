@@ -7,23 +7,22 @@ defmodule Wardrik.Server do
   the server. The `wardrik` hub implements it.
   """
 
-  @doc "Runs operation `id` with `input`, shaped as its input schema describes."
-  @callback run(Wardrik.Scope.t(), String.t(), map()) ::
-              {:ok, term()} | {:error, Wardrik.Error.t()}
+  @doc "Runs the request's operation with its input, shaped as its input schema describes."
+  @callback run(Wardrik.Server.Request.t()) :: {:ok, term()} | {:error, Wardrik.Error.t()}
 
-  @doc "Runs the streamed operation `id`. Streams `{event, cursor}` pairs: stored events, then new ones as they arrive."
-  @callback stream(Wardrik.Scope.t(), String.t(), map()) ::
+  @doc "Runs the request's streamed operation. Streams `{event, cursor}` pairs: stored events, then new ones as they arrive."
+  @callback stream(Wardrik.Server.Request.t()) ::
               {:ok, Enumerable.t()} | {:error, Wardrik.Error.t()}
 
   @doc """
-  Sends `input` to `agent` and streams its answer, in order:
+  Sends the input to the agent and streams its answer, in order:
 
     1. `{:text, chunk}`, any number of times.
     2. One of `{:done, %Wardrik.Reply{}}`, `{:waiting, interrupts}` or `{:failed, why}`.
 
   Raises `Wardrik.Error` if the agent can't be reached.
   """
-  @callback follow(Wardrik.Scope.t(), String.t() | struct(), term(), keyword()) :: Enumerable.t()
+  @callback follow(Wardrik.Server.Follow.t(), opts :: keyword()) :: Enumerable.t()
 
   @doc "Returns the scope an API token's `secret` acts in on `wardrik`, or an error."
   @callback authenticate(wardrik :: atom(), secret :: String.t()) ::

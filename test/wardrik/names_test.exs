@@ -52,9 +52,12 @@ defmodule Wardrik.NamesTest do
              Resource.agent("acme/triage/C1-1.1")
 
     assert Resource.agent("acme/*") == :error
-    assert Resource.owned("acme", "secret", "github") == "acme/secret/github"
-    assert Resource.owned("acme", "secret", nil) == "acme/secret"
-    assert Resource.owned("acme/@jon", "provider", "google") == "acme/@jon/provider/google"
+    assert Resource.owned("acme", kind: "secret", name: "github") == "acme/secret/github"
+    assert Resource.owned("acme", kind: "secret") == "acme/secret"
+
+    assert Resource.owned("acme/@jon", kind: "provider", name: "google") ==
+             "acme/@jon/provider/google"
+
     assert Resource.deployment() == "deployment"
   end
 

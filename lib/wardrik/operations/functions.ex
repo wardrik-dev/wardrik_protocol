@@ -73,36 +73,53 @@ defmodule Wardrik.Operations.Functions do
 
   defp define(operation, name, lead, ok, body) do
     parameters = path(operation)
-    arguments = Enum.map(parameters, &Macro.var(String.to_atom(&1), __MODULE__))
-    types = Enum.map(parameters, fn _parameter -> quote(do: String.t() | struct()) end)
-    named = Enum.map(arguments, fn argument -> quote(do: Types.path(unquote(argument))) end)
-    path_input = {:%{}, [], Enum.zip(parameters, named)}
     scope = Macro.var(:scope, __MODULE__)
     given = Macro.var(:input, __MODULE__)
-
-    input =
-      quote do
-        Map.merge(
-          Types.encode(unquote(operation.id), unquote(given)),
-          unquote(path_input)
-        )
-      end
+    {arguments, types, input} = arguments(operation.id, parameters, given)
 
     quote do
-      @doc unquote(doc(operation, lead))
-      @spec unquote(name)(Wardrik.Scope.t(), unquote_splicing(types), term()) ::
+      @doc unquote(doc(operation, lead, parameters))
+      @spec unquote(name)(Wardrik.Scope.t(), unquote_splicing(types)) ::
               unquote(ok) | :ok | {:error, Wardrik.Error.t()}
-      def unquote(name)(unquote(scope), unquote_splicing(arguments), unquote(given) \\ []) do
+      def unquote(name)(unquote(scope), unquote_splicing(arguments)) do
         unquote(body.(operation.id, scope, input))
       end
     end
   end
 
-  defp doc(operation, lead) do
+  # Two or more path parameters are named in the input, so their IDs can't be swapped.
+  defp arguments(id, [_first, _second | _more] = parameters, given) do
+    keys = Enum.map(parameters, &String.to_atom/1)
+    input = quote(do: Types.named(unquote(id), unquote(given), unquote(keys)))
+    {[given], [quote(do: keyword())], input}
+  end
+
+  defp arguments(id, parameters, given) do
+    arguments = Enum.map(parameters, &Macro.var(String.to_atom(&1), __MODULE__))
+    types = Enum.map(parameters, fn _parameter -> quote(do: String.t() | struct()) end)
+    named = Enum.map(arguments, fn argument -> quote(do: Types.path(unquote(argument))) end)
+    path_input = {:%{}, [], Enum.zip(parameters, named)}
+
+    input =
+      quote do
+        Map.merge(Types.encode(unquote(id), unquote(given)), unquote(path_input))
+      end
+
+    {arguments ++ [quote(do: unquote(given) \\ [])], types ++ [quote(do: term())], input}
+  end
+
+  defp doc(operation, lead, parameters) do
     route = "`#{String.upcase(operation.method)} #{operation.path}`"
 
-    [lead, operation.description, route]
+    [lead, operation.description, named(parameters), route]
     |> Enum.reject(&is_nil/1)
     |> Enum.join("\n\n")
   end
+
+  defp named([_first, _second | _more] = parameters) do
+    {last, keys} = parameters |> Enum.map(&"`:#{&1}`") |> List.pop_at(-1)
+    "Name #{Enum.join(keys, ", ")} and #{last} in `input`."
+  end
+
+  defp named(_parameters), do: nil
 end

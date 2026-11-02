@@ -41,14 +41,23 @@ defmodule Wardrik.Resource do
   end
 
   @doc """
-  Returns the resource for something `owner` holds: every item of `kind`, or the one `name`d.
+  Returns the resource for something `owner` holds: every item of `:kind`, or the one `:name`d.
 
-      Wardrik.Resource.owned("acme", "mcp_server", "linear")
+      Wardrik.Resource.owned("acme", kind: "mcp_server", name: "linear")
       #=> "acme/mcp_server/linear"
+
+      Wardrik.Resource.owned("acme", kind: "mcp_server")
+      #=> "acme/mcp_server"
   """
-  @spec owned(String.t(), String.t(), String.t() | nil) :: String.t()
-  def owned(owner, kind, nil), do: owner <> "/" <> kind
-  def owned(owner, kind, name), do: owner <> "/" <> kind <> "/" <> name
+  @spec owned(String.t(), kind: String.t(), name: String.t() | nil) :: String.t()
+  def owned(owner, args) do
+    kind = Keyword.fetch!(args, :kind)
+
+    case Keyword.get(args, :name) do
+      nil -> owner <> "/" <> kind
+      name -> owner <> "/" <> kind <> "/" <> name
+    end
+  end
 
   @doc "Returns the deployment's resource."
   @spec deployment() :: String.t()

@@ -90,7 +90,7 @@ defmodule Wardrik.Agent do
   end
 
   defp follow(%Wardrik.Scope{server: server} = scope, agent, input, opts),
-    do: server.follow(scope, agent, input, opts)
+    do: server.follow(%Wardrik.Server.Follow{scope: scope, agent: agent, input: input}, opts)
 
   defp send_to(scope, agent, input, pid, opts) do
     ref = make_ref()
